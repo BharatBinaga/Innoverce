@@ -1,0 +1,52 @@
+plugins {
+    id "com.android.application"
+    id "com.chaquo.python"
+    id "org.jetbrains.kotlin.android"
+}
+
+def siteAssetsDirectory = layout.buildDirectory.dir("generated/innoverceSiteAssets")
+
+tasks.register("prepareSiteAssets", Copy) {
+    from(rootProject.projectDir.parentFile) {
+        include "Orbit24.html"
+        include "auth.html"
+        include "profile.html"
+        include "server.py"
+        include "assets/**"
+    }
+    into(siteAssetsDirectory)
+}
+
+android {
+    namespace "com.innoverce26.app"
+    compileSdk 35
+
+    defaultConfig {
+        applicationId "com.innoverce26.app"
+        minSdk 24
+        targetSdk 35
+        versionCode 1
+        versionName "1.0"
+        ndk {
+            abiFilters "arm64-v8a", "armeabi-v7a"
+        }
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+
+    sourceSets {
+        main.assets.srcDir(siteAssetsDirectory)
+    }
+}
+
+chaquopy {
+    defaultConfig {
+        version = "3.10"
+    }
+}
+
+tasks.named("preBuild").configure {
+    dependsOn("prepareSiteAssets")
+}

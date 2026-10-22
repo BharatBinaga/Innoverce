@@ -1,0 +1,2650 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset=utf8>
+  <meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <script>
+    document.documentElement.style.visibility = 'hidden';
+    fetch('/api/session', { credentials: 'same-origin' }).then(function (response) {
+      if (!response.ok) {
+        location.replace('auth.html');
+        return;
+      }
+      document.documentElement.style.visibility = 'visible';
+    }).catch(function () {
+      location.replace('auth.html?error=service');
+    });
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      box-sizing: border-box;
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px)
+    }
+
+    html {
+      scroll-padding-top: env(safe-area-inset-top, 0px)
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font: 14px -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #fff;
+      color: #000
+    }
+
+    img {
+      max-width: 100%
+    }
+
+    [hidden]:not([hidden=until-found i]) {
+      display: none !important
+    }
+  </style>
+</head>
+
+<body>
+  <title>Innoverce 26</title>
+  <meta name="claude:viewport-fit-sides" content="cover">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+  <style>
+    /* Layout: floating pill nav, hero with a draggable 3D orbital rig beside the title,
+   then tracks (morphing 3D model + tabs), a scrubbable 24-hour mission clock, prizes, a boarding-pass sign-up. */
+    :root {
+      color-scheme: dark;
+      --ink: #000000;
+      --ink-2: #08080a;
+      --ink-3: #111115;
+      --line: rgba(225, 218, 205, 0.14);
+      --text: #efeae0;
+      --mute: #948f86;
+      --amber: #ffb347;
+      --ice: #d3d6db;
+      --mint: #a9c4b0;
+      --coral: #e8805f;
+      --c: var(--ice);
+      --display: "Bricolage Grotesque", "Arial Narrow", system-ui, sans-serif;
+      --body: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+      --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--ink);
+      color: var(--text);
+      font-family: var(--body);
+      font-size: 16px;
+      line-height: 1.55;
+      padding-block: 0 40px;
+      padding-left: max(16px, env(safe-area-inset-left, 0px));
+      padding-right: max(16px, env(safe-area-inset-right, 0px));
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0 0 auto;
+      height: env(safe-area-inset-top, 0px);
+      background: var(--ink);
+      z-index: 10;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background:
+        radial-gradient(700px 420px at 85% -5%, rgba(255, 170, 80, 0.07), transparent 70%),
+        radial-gradient(600px 400px at 0% 40%, rgba(255, 255, 255, 0.025), transparent 70%);
+    }
+
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--amber);
+      outline-offset: 3px;
+      border-radius: 6px;
+    }
+
+    /* deep-space backdrop: slow stars and drifting planets */
+    #space {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      z-index: -1;
+      pointer-events: none;
+      opacity: 0.92;
+    }
+
+    /* nav */
+    nav {
+      position: sticky;
+      top: calc(env(safe-area-inset-top, 0px) + 8px);
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 8px;
+      padding: 8px 8px 8px 16px;
+      background: rgba(6, 6, 8, 0.82);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--display);
+      font-weight: 700;
+      font-size: 18px;
+      text-decoration: none;
+      letter-spacing: -0.01em;
+    }
+
+    .brand i {
+      position: relative;
+      width: 22px;
+      height: 22px;
+      border: 1.5px solid var(--ice);
+      border-radius: 50%;
+      display: inline-block;
+      transform: rotate(-25deg) scaleY(0.55);
+    }
+
+    .brand i::after {
+      content: "";
+      position: absolute;
+      width: 7px;
+      height: 7px;
+      background: var(--amber);
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scaleY(1.8);
+    }
+
+    .links {
+      display: flex;
+      gap: 22px;
+      font-size: 14px;
+      color: var(--mute);
+    }
+
+    .links a {
+      text-decoration: none;
+      padding: 4px 0;
+    }
+
+    .links a:hover {
+      color: var(--text);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 0;
+      cursor: pointer;
+      background: var(--amber);
+      color: #1a1204;
+      font: 600 15px var(--body);
+      padding: 11px 20px;
+      border-radius: 999px;
+      text-decoration: none;
+      transition: transform .15s ease, box-shadow .2s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(255, 179, 71, 0.3);
+    }
+
+    .btn.ghost {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+
+    .btn.ghost:hover {
+      border-color: var(--ice);
+      box-shadow: none;
+    }
+
+    .btn.sm {
+      padding: 8px 16px;
+      font-size: 14px;
+    }
+
+    /* hero */
+    .hero {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 40px;
+      align-items: center;
+      padding-block: 52px 36px;
+    }
+
+    .hero>* {
+      min-width: 0;
+    }
+
+    .eyebrow {
+      font: 500 12px var(--mono);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ice);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 14px;
+    }
+
+    .eyebrow span+span::before {
+      content: "/";
+      margin-right: 14px;
+      color: var(--mute);
+    }
+
+    h1 {
+      font-family: var(--display);
+      font-weight: 800;
+      line-height: 0.86;
+      letter-spacing: -0.035em;
+      margin: 18px 0 22px;
+      font-size: clamp(4.2rem, 11vw, 8rem);
+      text-wrap: balance;
+    }
+
+    h1 .n {
+      display: block;
+      color: transparent;
+      -webkit-text-stroke: 2px var(--amber);
+      font-size: 1em;
+    }
+
+    .lede {
+      font-size: 1.125rem;
+      color: var(--mute);
+      max-width: 46ch;
+      margin: 0 0 26px;
+    }
+
+    .lede b {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .cta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 30px;
+    }
+
+    .count {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0;
+      max-width: 440px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(8, 8, 10, 0.6);
+    }
+
+    .count div {
+      padding: 12px 6px 10px;
+      text-align: center;
+    }
+
+    .count div+div {
+      border-left: 1px solid var(--line);
+    }
+
+    .count b {
+      display: block;
+      font: 500 clamp(1.5rem, 5vw, 2rem) var(--mono);
+      font-variant-numeric: tabular-nums;
+      color: var(--text);
+      line-height: 1.1;
+    }
+
+    .count small {
+      font: 400 10.5px var(--mono);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--mute);
+    }
+
+    .count-label {
+      font: 400 12px var(--mono);
+      color: var(--mute);
+      margin: 0 0 8px;
+      letter-spacing: 0.06em;
+    }
+
+    .stage {
+      position: relative;
+      width: 100%;
+      max-width: 100%;
+      aspect-ratio: 1 / 1;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: radial-gradient(circle at 50% 45%, rgba(255, 179, 71, 0.05), transparent 62%), var(--ink-2);
+      overflow: hidden;
+    }
+
+    .stage canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      touch-action: pan-y;
+      cursor: grab;
+    }
+
+    .hud {
+      position: absolute;
+      font: 400 10.5px var(--mono);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--mute);
+      pointer-events: none;
+    }
+
+    .hud.tl {
+      top: 14px;
+      left: 16px;
+    }
+
+    .hud.tr {
+      top: 14px;
+      right: 16px;
+      color: var(--amber);
+    }
+
+    .hud.bl {
+      bottom: 14px;
+      left: 16px;
+    }
+
+    .hud.br {
+      bottom: 14px;
+      right: 16px;
+    }
+
+    .zoom-controls {
+      position: absolute;
+      left: 50%;
+      bottom: 38px;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(6, 6, 8, 0.86);
+    }
+
+    .zoom-controls button {
+      min-width: 30px;
+      height: 28px;
+      padding: 0 8px;
+      border: 0;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--text);
+      font: 500 14px var(--mono);
+      cursor: pointer;
+    }
+
+    .zoom-controls button:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .zoom-controls button:focus-visible {
+      outline: 2px solid var(--amber);
+      outline-offset: 2px;
+    }
+
+    .zoom-controls .zoom-reset {
+      color: var(--mute);
+      font-size: 10px;
+    }
+
+    .zoom-controls .wire-toggle {
+      min-width: 66px;
+      color: var(--amber);
+      font-size: 10px;
+    }
+
+    .zoom-controls .wire-toggle[aria-pressed="false"] {
+      color: var(--mute);
+    }
+
+    .nogl {
+      display: none;
+      position: absolute;
+      inset: 0;
+      place-items: center;
+      text-align: center;
+      padding: 24px;
+      color: var(--mute);
+      font: 14px var(--mono);
+    }
+
+    .stage.nowebgl .nogl {
+      display: grid;
+    }
+
+    .facts {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      border-block: 1px solid var(--line);
+      margin-block: 8px 0;
+    }
+
+    .facts div {
+      padding: 18px 16px;
+    }
+
+    .facts div+div {
+      border-left: 1px solid var(--line);
+    }
+
+    .facts dt {
+      font: 400 11px var(--mono);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--mute);
+    }
+
+    .facts dd {
+      margin: 4px 0 0;
+      font: 600 1.25rem var(--display);
+    }
+
+    /* sections */
+    section {
+      padding-block: 84px 8px;
+      scroll-margin-top: 70px;
+    }
+
+    .kicker {
+      font: 500 12px var(--mono);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin: 0 0 10px;
+    }
+
+    h2 {
+      font-family: var(--display);
+      font-weight: 700;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      line-height: 1;
+      letter-spacing: -0.025em;
+      margin: 0 0 16px;
+      text-wrap: balance;
+      max-width: 18ch;
+    }
+
+    .sub {
+      color: var(--mute);
+      max-width: 56ch;
+      margin: 0 0 36px;
+    }
+
+    /* tracks */
+    .tracks {
+      display: grid;
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+      gap: 36px;
+      align-items: center;
+      --c: var(--ice);
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 22px;
+    }
+
+    .tab {
+      text-align: left;
+      cursor: pointer;
+      background: transparent;
+      color: var(--mute);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px 14px;
+      font: 500 14px var(--body);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      transition: border-color .2s, color .2s, background .2s;
+    }
+
+    .tab small {
+      font: 400 10.5px var(--mono);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .tab strong {
+      font: 700 1.1rem var(--display);
+      color: var(--text);
+    }
+
+    .tab:hover {
+      border-color: var(--mute);
+    }
+
+    .tab[aria-selected="true"] {
+      border-color: var(--c);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--c);
+    }
+
+    .tinfo h3 {
+      font: 700 1.6rem var(--display);
+      margin: 0 0 6px;
+      letter-spacing: -0.015em;
+    }
+
+    .tinfo p {
+      margin: 0 0 14px;
+      color: var(--mute);
+    }
+
+    .tinfo .brief {
+      color: var(--text);
+      border-left: 2px solid var(--c);
+      padding: 2px 0 2px 14px;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 0;
+      margin: 0;
+      list-style: none;
+    }
+
+    .chips li {
+      font: 400 12px var(--mono);
+      padding: 5px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--c);
+    }
+
+    .tprize {
+      font: 400 12px var(--mono);
+      letter-spacing: 0.06em;
+      margin-top: 16px;
+      color: var(--mute);
+    }
+
+    .tprize b {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    /* mission clock */
+    .clock {
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: var(--ink-2);
+      padding: 26px;
+      display: grid;
+      grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+      gap: 36px;
+    }
+
+    .clock>* {
+      min-width: 0;
+    }
+
+    .readout {
+      font: 500 clamp(2.4rem, 7vw, 4rem) var(--mono);
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+      letter-spacing: -0.03em;
+      color: var(--amber);
+    }
+
+    .readout small {
+      display: block;
+      font: 400 12px var(--mono);
+      letter-spacing: 0.12em;
+      color: var(--mute);
+      text-transform: uppercase;
+      margin-top: 10px;
+    }
+
+    .now {
+      margin-top: 20px;
+      font: 600 1.2rem var(--display);
+    }
+
+    .now span {
+      display: block;
+      font: 400 14px var(--body);
+      color: var(--mute);
+      margin-top: 4px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      margin: 26px 0 6px;
+      accent-color: var(--amber);
+      height: 28px;
+      cursor: pointer;
+    }
+
+    .ticks {
+      display: flex;
+      justify-content: space-between;
+      font: 400 10.5px var(--mono);
+      color: var(--mute);
+    }
+
+    .sched {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 2px;
+    }
+
+    .sched button {
+      width: 100%;
+      text-align: left;
+      display: grid;
+      grid-template-columns: 64px 1fr;
+      gap: 14px;
+      align-items: baseline;
+      background: transparent;
+      border: 0;
+      color: var(--mute);
+      padding: 10px 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      font: 400 15px var(--body);
+      transition: background .2s, color .2s;
+    }
+
+    .sched button:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .sched .t {
+      font: 400 12px var(--mono);
+    }
+
+    .sched .done {
+      color: #5a564f;
+    }
+
+    .sched .done .t::after {
+      content: " ✓";
+    }
+
+    .sched .on {
+      background: rgba(255, 179, 71, 0.1);
+      color: var(--text);
+    }
+
+    .sched .on .t {
+      color: var(--amber);
+    }
+
+    .sched em {
+      font-style: normal;
+      display: block;
+      font-size: 13px;
+      color: var(--mute);
+    }
+
+    /* prizes */
+    .prizes {
+      border-top: 1px solid var(--line);
+    }
+
+    .prow {
+      display: grid;
+      grid-template-columns: 56px minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: center;
+      padding: 22px 4px;
+      border-bottom: 1px solid var(--line);
+      transition: padding .25s ease, background .25s;
+    }
+
+    .prow:hover {
+      padding-left: 16px;
+      background: linear-gradient(90deg, rgba(255, 179, 71, 0.07), transparent 60%);
+    }
+
+    .prow .rk {
+      font: 500 13px var(--mono);
+      color: var(--mute);
+    }
+
+    .prow h3 {
+      margin: 0;
+      font: 700 1.35rem var(--display);
+    }
+
+    .prow p {
+      margin: 2px 0 0;
+      color: var(--mute);
+      font-size: 14px;
+    }
+
+    .prow .amt {
+      font: 800 clamp(1.8rem, 5vw, 3rem) var(--display);
+      letter-spacing: -0.03em;
+      color: var(--text);
+    }
+
+    .prow:first-child .amt {
+      color: var(--amber);
+    }
+
+    .perks {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 22px;
+      margin: 22px 0 0;
+      padding: 0;
+      list-style: none;
+      color: var(--mute);
+      font-size: 14px;
+    }
+
+    .perks li::before {
+      content: "+";
+      font-family: var(--mono);
+      color: var(--amber);
+      margin-right: 8px;
+    }
+
+    /* register */
+    .reg {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 36px;
+      align-items: start;
+    }
+
+    form {
+      display: grid;
+      gap: 14px;
+    }
+
+    .row2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      font: 400 12px var(--mono);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--mute);
+    }
+
+    input[type="text"],
+    input[type="email"],
+    select {
+      width: 100%;
+      background: var(--ink-2);
+      color: var(--text);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font: 400 16px var(--body);
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    input::placeholder {
+      color: #5a564f;
+    }
+
+    input:hover,
+    select:hover {
+      border-color: var(--mute);
+    }
+
+    input:focus-visible,
+    select:focus-visible {
+      outline: 2px solid var(--amber);
+      outline-offset: 1px;
+    }
+
+    .note {
+      font-size: 13px;
+      color: var(--mute);
+      margin: 4px 0 0;
+    }
+
+    .pass {
+      position: relative;
+      border-radius: 22px;
+      background: linear-gradient(135deg, var(--ink-3), var(--ink-2));
+      border: 1px solid var(--line);
+      overflow: hidden;
+      --c: var(--amber);
+    }
+
+    .pass-top {
+      padding: 22px 24px 18px;
+      border-bottom: 2px dashed var(--line);
+      position: relative;
+    }
+
+    .pass-top::before,
+    .pass-top::after {
+      content: "";
+      position: absolute;
+      bottom: -11px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--ink);
+    }
+
+    .pass-top::before {
+      left: -11px;
+    }
+
+    .pass-top::after {
+      right: -11px;
+    }
+
+    .pass .lab {
+      font: 400 10.5px var(--mono);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--mute);
+    }
+
+    .pass .big {
+      font: 800 clamp(1.5rem, 5vw, 2.1rem) var(--display);
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      margin: 4px 0 14px;
+      overflow-wrap: anywhere;
+    }
+
+    .pass .grid3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .pass .grid3 b {
+      display: block;
+      font: 500 14px var(--mono);
+      color: var(--c);
+      overflow-wrap: anywhere;
+    }
+
+    .pass-bot {
+      padding: 16px 24px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .pass-bot .code {
+      font: 500 15px var(--mono);
+      letter-spacing: 0.1em;
+    }
+
+    .bars {
+      height: 34px;
+      width: 130px;
+      max-width: 45%;
+      background: repeating-linear-gradient(90deg, var(--text) 0 2px, transparent 2px 5px, var(--text) 5px 6px, transparent 6px 10px, var(--text) 10px 13px, transparent 13px 15px);
+      opacity: 0.8;
+    }
+
+    .pass.empty .big,
+    .pass.empty b {
+      opacity: 0.45;
+    }
+
+    .stamp {
+      position: absolute;
+      right: 18px;
+      top: 18px;
+      font: 500 11px var(--mono);
+      letter-spacing: 0.14em;
+      color: var(--c);
+      border: 1px solid var(--c);
+      border-radius: 6px;
+      padding: 3px 8px;
+      transform: rotate(6deg);
+    }
+
+    /* faq */
+    .faq {
+      border-top: 1px solid var(--line);
+      max-width: 760px;
+    }
+
+    details {
+      border-bottom: 1px solid var(--line);
+    }
+
+    summary {
+      cursor: pointer;
+      padding: 18px 4px;
+      font: 600 1.1rem var(--display);
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    summary::-webkit-details-marker {
+      display: none;
+    }
+
+    summary::after {
+      content: "+";
+      font: 400 20px var(--mono);
+      color: var(--amber);
+      transition: transform .2s;
+    }
+
+    details[open] summary::after {
+      transform: rotate(45deg);
+    }
+
+    details p {
+      margin: 0 0 18px;
+      color: var(--mute);
+      padding-inline: 4px;
+      max-width: 60ch;
+    }
+
+    footer {
+      margin-top: 90px;
+      padding-top: 22px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 10px;
+      font: 400 12px var(--mono);
+      color: var(--mute);
+      letter-spacing: 0.06em;
+    }
+
+    /* frosted glass: every floating panel, tab and field shares one translucent material */
+    .count,
+    .clock,
+    .pass,
+    .stage,
+    .facts,
+    .prizes,
+    .faq,
+    nav {
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.022));
+      -webkit-backdrop-filter: blur(18px) saturate(150%);
+      backdrop-filter: blur(18px) saturate(150%);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 12px 40px rgba(0, 0, 0, 0.35);
+    }
+
+    .facts {
+      border-radius: 18px;
+      margin-top: 12px;
+    }
+
+    .prizes {
+      border-radius: 18px;
+      padding-inline: 12px;
+      overflow: hidden;
+    }
+
+    .prow:last-child {
+      border-bottom: 0;
+    }
+
+    .faq {
+      border-radius: 18px;
+      padding-inline: 18px;
+      max-width: 760px;
+    }
+
+    details:last-child {
+      border-bottom: 0;
+    }
+
+    .tab {
+      background: rgba(255, 255, 255, 0.045);
+      border-color: rgba(255, 255, 255, 0.13);
+      -webkit-backdrop-filter: blur(14px) saturate(140%);
+      backdrop-filter: blur(14px) saturate(140%);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .tab:hover {
+      background: rgba(255, 255, 255, 0.075);
+    }
+
+    .tab[aria-selected="true"] {
+      background: rgba(255, 255, 255, 0.11);
+      border-color: var(--c);
+    }
+
+    .btn.ghost {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.16);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+    }
+
+    .btn.ghost:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .chips li {
+      background: rgba(255, 255, 255, 0.05);
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+      border-color: rgba(255, 255, 255, 0.14);
+    }
+
+    input[type="text"],
+    input[type="email"],
+    select {
+      background: rgba(255, 255, 255, 0.055);
+      border-color: rgba(255, 255, 255, 0.15);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+
+    .sched button:hover {
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    @media (prefers-reduced-transparency: reduce) {
+
+      .count,
+      .clock,
+      .pass,
+      .stage,
+      .facts,
+      .prizes,
+      .faq,
+      nav,
+      .tab,
+      .btn.ghost,
+      .chips li,
+      input[type="text"],
+      input[type="email"],
+      select {
+        background: rgba(14, 14, 17, 0.96);
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+      }
+    }
+
+    /* boarding pass: landscape ticket with barcode strip, emblem, rover, fields and patch */
+    .reg .pass {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: 54px minmax(0, 1fr);
+      --c: var(--amber);
+    }
+
+    .pbar {
+      position: relative;
+      min-height: 100%;
+      border-right: 1px dashed rgba(255, 255, 255, 0.22);
+    }
+
+    .pbar::before {
+      content: "";
+      position: absolute;
+      inset: 18px 15px;
+      opacity: 0.85;
+      background: repeating-linear-gradient(0deg, var(--text) 0 2px, transparent 2px 5px, var(--text) 5px 6px, transparent 6px 10px, var(--text) 10px 13px, transparent 13px 15px);
+    }
+
+    .pbody {
+      min-width: 0;
+      padding: 18px 22px 20px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .phead {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px 18px;
+    }
+
+    .pbrand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+      font: 700 14px var(--display);
+      letter-spacing: 0.045em;
+      text-transform: uppercase;
+    }
+
+    .pbrand i {
+      position: relative;
+      flex: 0 0 24px;
+      width: 24px;
+      height: 24px;
+      border: 1.5px solid var(--ice);
+      border-radius: 50%;
+      display: inline-block;
+      transform: rotate(-25deg) scaleY(0.55);
+    }
+
+    .pbrand i::after {
+      content: "";
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: var(--amber);
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scaleY(1.8);
+    }
+
+    .pnum {
+      display: grid;
+      grid-template-columns: auto auto;
+      align-items: center;
+      gap: 3px 10px;
+      justify-items: end;
+    }
+
+    .pnum .lab {
+      grid-column: 1 / -1;
+    }
+
+    .pnum b {
+      font: 500 clamp(0.85rem, 2vw, 1.1rem) var(--mono);
+      letter-spacing: 0.06em;
+      color: var(--c);
+      overflow-wrap: anywhere;
+    }
+
+    .pass .stamp {
+      position: static;
+      transform: none;
+      margin-top: 0;
+      font-size: 9px;
+      padding: 3px 6px;
+    }
+
+    .pmain {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 14px;
+      position: relative;
+    }
+
+    .rover-scene {
+      position: relative;
+      grid-column: 1 / -1;
+      min-width: 0;
+      height: 188px;
+      overflow: hidden;
+      border: 1px solid rgba(212, 222, 232, 0.18);
+      border-radius: 12px;
+      isolation: isolate;
+      background:
+        radial-gradient(ellipse at 78% 26%, rgba(213, 224, 241, 0.13), transparent 28%),
+        radial-gradient(ellipse at 12% 0%, rgba(224, 178, 113, 0.08), transparent 42%),
+        linear-gradient(180deg, #080d17 0%, #101a28 63%, #333740 100%);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 14px 34px rgba(0, 0, 0, 0.18);
+    }
+
+    .rover-scene::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(90deg, rgba(5, 8, 14, 0.17), transparent 39%, transparent 72%, rgba(5, 8, 14, 0.1)),
+        linear-gradient(0deg, rgba(4, 6, 10, 0.28), transparent 30%);
+    }
+
+    .rover-illustration {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      pointer-events: none;
+    }
+
+    .rover-hud,
+    .rover-location {
+      position: absolute;
+      z-index: 1;
+      left: 16px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font: 10px/1.4 var(--mono);
+      letter-spacing: 0.1em;
+      pointer-events: none;
+      text-shadow: 0 1px 8px #05070b;
+    }
+
+    .rover-hud {
+      top: 15px;
+      color: rgba(239, 234, 224, 0.78);
+    }
+
+    .rover-hud i {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--amber);
+      box-shadow: 0 0 12px rgba(255, 179, 71, 0.72);
+    }
+
+    .rover-location {
+      bottom: 14px;
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 2px;
+      color: rgba(239, 234, 224, 0.9);
+    }
+
+    .rover-location small {
+      color: rgba(211, 214, 219, 0.68);
+      font: inherit;
+      letter-spacing: 0.08em;
+    }
+
+    .patch {
+      position: absolute;
+      z-index: 2;
+      top: 12px;
+      right: 13px;
+      width: 78px;
+      height: auto;
+      padding: 5px;
+      border: 1px solid rgba(225, 218, 205, 0.16);
+      border-radius: 50%;
+      background: rgba(6, 9, 15, 0.66);
+      color: var(--c);
+      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4));
+      pointer-events: none;
+    }
+
+    .pfields {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px 18px;
+    }
+
+    .pfields .wide {
+      grid-column: span 2;
+    }
+
+    .pfields>div {
+      min-width: 0;
+      padding-top: 9px;
+      border-top: 1px solid rgba(225, 218, 205, 0.12);
+    }
+
+    .pfields .wide:first-child,
+    .pfields .wide:last-child {
+      grid-column: span 2;
+    }
+
+    .pfields .lab {
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    .pfields b {
+      display: block;
+      font: 500 13px/1.4 var(--mono);
+      color: var(--text);
+      overflow-wrap: anywhere;
+    }
+
+    .pfields .accent b {
+      color: var(--c);
+    }
+
+    .pass-actions {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: flex-end;
+      margin-top: -18px;
+    }
+
+    .reg>.pass-actions {
+      grid-column: 1 / -1;
+      margin-top: -18px;
+    }
+
+    .pass-download {
+      padding: 9px 16px;
+      font-size: 13px;
+    }
+
+    @media print {
+      @page {
+        size: landscape;
+        margin: 10mm;
+      }
+
+      body {
+        padding: 0;
+        background: #fff;
+      }
+
+      body * {
+        visibility: hidden !important;
+      }
+
+      #pass,
+      #pass * {
+        visibility: visible !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      #pass {
+        position: absolute;
+        inset: 0 auto auto 0;
+        display: grid;
+        width: 100%;
+        border: 1px solid rgba(225, 218, 205, 0.3);
+        border-radius: 12px;
+        background: #0b0b0e;
+        box-shadow: none;
+      }
+
+      #pass .pbody {
+        padding: 8mm;
+        gap: 5mm;
+      }
+
+      #pass .rover-scene {
+        height: 48mm;
+      }
+
+      #pass .pfields {
+        gap: 4mm 8mm;
+      }
+
+      #pass .pfields b {
+        font-size: 10pt;
+      }
+
+      .pass-actions {
+        display: none !important;
+      }
+    }
+
+    @media (max-width: 960px) {
+      .pfields {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .rover-scene {
+        height: 176px;
+      }
+
+      .patch {
+        width: 64px;
+        right: 10px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .reg .pass {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .pbar {
+        display: none;
+      }
+
+      .pbody {
+        padding: 14px 14px 16px;
+        gap: 12px;
+      }
+
+      .phead {
+        gap: 8px;
+      }
+
+      .pbrand {
+        gap: 8px;
+        font-size: 10px;
+        letter-spacing: 0.025em;
+      }
+
+      .pbrand i {
+        flex-basis: 20px;
+        width: 20px;
+        height: 20px;
+      }
+
+      .pbrand i::after {
+        width: 6px;
+        height: 6px;
+      }
+
+      .pnum {
+        gap: 2px 6px;
+      }
+
+      .pnum b {
+        font-size: 10px;
+        letter-spacing: 0.03em;
+      }
+
+      .pass .stamp {
+        font-size: 8px;
+        padding: 2px 5px;
+      }
+
+      .rover-scene {
+        height: 150px;
+      }
+
+      .rover-illustration {
+        transform: scale(1.18);
+      }
+
+      .rover-callout {
+        display: none;
+      }
+
+      .rover-hud,
+      .rover-location {
+        left: 12px;
+        font-size: 9px;
+      }
+
+      .rover-hud {
+        top: 12px;
+      }
+
+      .pfields {
+        gap: 8px 12px;
+      }
+
+      .pfields .wide:nth-child(4),
+      .pfields .wide:nth-child(5) {
+        grid-column: span 1;
+      }
+
+      .pfields>div {
+        padding-top: 7px;
+      }
+
+      .pfields .lab {
+        font-size: 9px;
+      }
+
+      .pfields b {
+        font-size: 11px;
+        line-height: 1.35;
+      }
+    }
+
+    @media (max-width: 860px) {
+      .links {
+        display: flex;
+        gap: 12px;
+      }
+
+      .links a:not(:last-child) {
+        display: none;
+      }
+
+      .hero {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 28px;
+        padding-top: 28px;
+      }
+
+      .stage.hero-stage {
+        order: -1;
+        aspect-ratio: 4 / 3;
+      }
+
+      .facts {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .facts div:nth-child(3) {
+        border-left: 0;
+      }
+
+      .facts div:nth-child(n+3) {
+        border-top: 1px solid var(--line);
+      }
+
+      .tracks,
+      .clock,
+      .reg {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 26px;
+      }
+
+      .clock {
+        padding: 18px;
+      }
+
+      section {
+        padding-top: 64px;
+      }
+
+      .prow {
+        grid-template-columns: 38px minmax(0, 1fr) auto;
+        gap: 12px;
+      }
+
+      .row2 {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      * {
+        transition: none !important;
+      }
+
+    }
+  </style>
+
+  <canvas id="space" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <nav aria-label="Main">
+      <a class="brand" href="#top"><i aria-hidden="true"></i>Innoverce 26</a>
+      <div class="links">
+        <a href="#tracks">Tracks</a><a href="#clock">Schedule</a><a href="#prizes">Prizes</a><a href="#faq">FAQ</a><a
+          href="profile.html">Profile</a>
+      </div>
+      <button class="btn sm" id="signOut" type="button">Sign out</button>
+    </nav>
+
+    <header class="hero" id="top">
+      <div>
+        <div class="eyebrow"><span>24-hour hackathon</span><span>5–6 Dec 2026</span><span>Main Auditorium</span></div>
+        <h1>Innoverce<span class="n">26</span></h1>
+        <p class="lede">Teams of up to four. <b>One launch window.</b> You get 24 hours, four tracks, mentors on call
+          and a stage to demo from. Bring a problem worth solving.</p>
+        <div class="cta">
+          <a class="btn" href="#register">Get your boarding pass</a>
+          <a class="btn ghost" href="#tracks">Explore tracks</a>
+        </div>
+        <p class="count-label">HACKING BEGINS IN</p>
+        <div class="count" id="count" role="timer" aria-live="off">
+          <div><b id="cd">--</b><small>Days</small></div>
+          <div><b id="ch">--</b><small>Hrs</small></div>
+          <div><b id="cm">--</b><small>Min</small></div>
+          <div><b id="cs">--</b><small>Sec</small></div>
+        </div>
+      </div>
+      <div class="stage hero-stage" id="heroStage">
+        <canvas id="heroCanvas"
+          aria-label="Interactive 3D Earth and orbital model. Drag to rotate, pinch or scroll to zoom, and tap to send a pulse. Use the zoom buttons for precise control."></canvas>
+        <span class="hud tl">ORB-01 / Earth</span>
+        <span class="hud tr" id="hudPulse">Pulses 00</span>
+        <span class="hud bl">Drag to rotate</span>
+        <span class="hud br">Tap to pulse</span>
+        <div class="zoom-controls" role="group" aria-label="Earth display and zoom controls">
+          <button type="button" id="zoomOut" aria-label="Zoom out">−</button>
+          <button type="button" id="zoomReset" class="zoom-reset" aria-label="Reset zoom">RESET</button>
+          <button type="button" id="zoomIn" aria-label="Zoom in">+</button>
+          <button type="button" id="wireToggle" class="wire-toggle" aria-label="Disable Earth wireframe"
+            aria-pressed="true">WIRE ON</button>
+        </div>
+        <div class="nogl">3D view needs WebGL. The rest of the page works without it.</div>
+      </div>
+    </header>
+
+    <dl class="facts">
+      <div>
+        <dt>Format</dt>
+        <dd>24 hours, in person</dd>
+      </div>
+      <div>
+        <dt>Team size</dt>
+        <dd>1 to 4 students</dd>
+      </div>
+      <div>
+        <dt>Prize pool</dt>
+        <dd>₹1,40,000</dd>
+      </div>
+      <div>
+        <dt>Entry</dt>
+        <dd>Free, meals included</dd>
+      </div>
+    </dl>
+
+    <section id="tracks">
+      <p class="kicker">Tracks</p>
+      <h2>Pick a payload</h2>
+      <p class="sub">Four tracks, each with its own real-world brief. Select one to see its model and a sample problem
+        statement.</p>
+      <div class="tracks" id="tracksBox">
+        <div class="stage" id="trackStage">
+          <canvas id="trackCanvas" aria-label="3D model for the selected track. Drag to rotate."></canvas>
+          <span class="hud tl" id="hudTrack">Payload / Signal</span>
+          <span class="hud br">Drag to rotate</span>
+          <div class="nogl">3D view needs WebGL.</div>
+        </div>
+        <div>
+          <div class="tabs" role="tablist" id="tabs"></div>
+          <div class="tinfo" aria-live="polite">
+            <h3 id="tName"></h3>
+            <p id="tDesc"></p>
+            <p class="brief" id="tBrief"></p>
+            <ul class="chips" id="tStack"></ul>
+            <p class="tprize" id="tPrize"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="clock">
+      <p class="kicker">Schedule</p>
+      <h2>The 24-hour mission clock</h2>
+      <p class="sub">Drag the slider to move through the weekend, or tap any milestone. T+0 is the moment hacking
+        begins.</p>
+      <div class="clock">
+        <div>
+          <div class="readout"><span id="rdT">T+00</span><small id="rdClock">Sat 11:00</small></div>
+          <div class="now" id="nowBox"></div>
+          <input type="range" id="slider" min="0" max="28" step="1" value="0" aria-label="Hours since hacking began">
+          <div class="ticks"><span>T+0</span><span>T+7</span><span>T+14</span><span>T+21</span><span>T+28</span></div>
+        </div>
+        <ol class="sched" id="sched"></ol>
+      </div>
+    </section>
+
+    <section id="prizes">
+      <p class="kicker">Prizes</p>
+      <h2>What lands on the podium</h2>
+      <p class="sub">Judged on the problem you picked, how well it works live, and how clearly you explain it in four
+        minutes.</p>
+      <div class="prizes">
+        <div class="prow"><span class="rk">1st</span>
+          <div>
+            <h3>Grand Orbit</h3>
+            <p>Best overall project across all tracks</p>
+          </div><span class="amt">₹50,000</span>
+        </div>
+        <div class="prow"><span class="rk">2nd</span>
+          <div>
+            <h3>High Orbit</h3>
+            <p>Runner-up, overall</p>
+          </div><span class="amt">₹30,000</span>
+        </div>
+        <div class="prow"><span class="rk">3rd</span>
+          <div>
+            <h3>Low Orbit</h3>
+            <p>Third place, overall</p>
+          </div><span class="amt">₹20,000</span>
+        </div>
+        <div class="prow"><span class="rk">x4</span>
+          <div>
+            <h3>Track winners</h3>
+            <p>One per track: Signal, Terra, Helix, Wildcard</p>
+          </div><span class="amt">₹10,000</span>
+        </div>
+      </div>
+      <ul class="perks">
+        <li>Certificates for every participant</li>
+        <li>Mentor sessions with industry engineers</li>
+        <li>Swag kit for all teams</li>
+        <li>Internship referrals for finalists</li>
+      </ul>
+    </section>
+
+    <section id="register">
+      <p class="kicker">Register</p>
+      <h2>Get your boarding pass</h2>
+      <p class="sub">Fill in your team details. Your pass updates as you type.</p>
+      <div class="reg">
+        <form id="regForm" autocomplete="on">
+          <label for="fName">Your name<input type="text" id="fName" name="name" placeholder="Aarav Gowda"
+              required></label>
+          <label for="fEmail">Email<input type="email" id="fEmail" name="email" placeholder="you@college.edu"
+              required></label>
+          <label for="fCollege">College<input type="text" id="fCollege" name="college" placeholder="Your college"
+              required></label>
+          <div class="row2">
+            <label for="fTeam">Team name<input type="text" id="fTeam" name="team" placeholder="Null Pointers"
+                required></label>
+            <label for="fSize">Team size
+              <select id="fSize" name="size">
+                <option>1</option>
+                <option>2</option>
+                <option>3</option>
+                <option selected>4</option>
+              </select>
+            </label>
+          </div>
+          <label for="fTrack">Track<select id="fTrack" name="track"></select></label>
+          <button class="btn" type="submit">Issue boarding pass</button>
+          <p class="note" id="formNote">Your boarding pass will be saved to your account when you submit.</p>
+        </form>
+        <div class="pass empty" id="pass" aria-live="polite">
+          <div class="pbar" aria-hidden="true"></div>
+          <div class="pbody">
+            <div class="phead">
+              <div class="pbrand"><i aria-hidden="true"></i>Innoverce 26 Launch Services</div>
+              <div class="pnum"><span class="lab">Pass number</span><b id="pNum">I26000000000</b><span class="stamp"
+                  id="stamp">DRAFT</span></div>
+            </div>
+            <div class="pmain">
+              <div class="rover-scene">
+                <svg class="rover-illustration" viewBox="0 0 860 348" role="img"
+                  aria-labelledby="roverTitle roverDescription" preserveAspectRatio="xMidYMid meet">
+                  <title id="roverTitle">Innoverce 26 lunar survey rover</title>
+                  <desc id="roverDescription">A detailed technical illustration of a six-wheeled lunar rover, with a
+                    camera mast, solar panels, rocker-bogie suspension and robotic sampling arm, exploring the Tycho
+                    Highlands.</desc>
+                  <defs>
+                    <linearGradient id="roverDeck" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0" stop-color="#e4c38e" />
+                      <stop offset="1" stop-color="#94734e" />
+                    </linearGradient>
+                    <linearGradient id="roverWheel" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0" stop-color="#59616a" />
+                      <stop offset="0.5" stop-color="#1d232b" />
+                      <stop offset="1" stop-color="#090d13" />
+                    </linearGradient>
+                    <linearGradient id="roverPanel" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0" stop-color="#385879" />
+                      <stop offset="1" stop-color="#14283e" />
+                    </linearGradient>
+                    <filter id="roverGlow" x="-100%" y="-100%" width="300%" height="300%">
+                      <feGaussianBlur stdDeviation="5" />
+                    </filter>
+                  </defs>
+                  <g fill="#d8e5f5">
+                    <circle cx="141" cy="84" r="1.6" opacity=".72" />
+                    <circle cx="212" cy="113" r="1.1" opacity=".55" />
+                    <circle cx="298" cy="73" r="1.4" opacity=".65" />
+                    <circle cx="394" cy="100" r="1" opacity=".52" />
+                    <circle cx="704" cy="89" r="1.4" opacity=".68" />
+                    <circle cx="755" cy="122" r="1" opacity=".55" />
+                  </g>
+                  <circle cx="184" cy="116" r="8" fill="#ffcf8b" opacity=".22" filter="url(#roverGlow)" />
+                  <circle cx="184" cy="116" r="2.4" fill="#fff0d3" />
+                  <path d="M36 287 Q92 272 148 285 T261 282 T376 286 T493 280 T609 284 T724 279 T862 285 V348 H36Z"
+                    fill="#9b8d7a" opacity=".12" />
+                  <path d="M36 287 Q92 272 148 285 T261 282 T376 286 T493 280 T609 284 T724 279 T862 285" fill="none"
+                    stroke="#d0b99b" stroke-opacity=".34" stroke-width="1.5" />
+                  <g fill="#c6ad8c" opacity=".33">
+                    <path d="m128 284 7-8 9 8zm610-1 8-10 12 10zm-502 3 5-5 7 5zm190 0 7-7 10 7z" />
+                    <circle cx="224" cy="292" r="2" />
+                    <circle cx="696" cy="293" r="2.4" />
+                    <circle cx="778" cy="286" r="1.6" />
+                    <circle cx="311" cy="293" r="1.5" />
+                  </g>
+                  <ellipse cx="491" cy="285" rx="206" ry="12" fill="#03070d" opacity=".4" />
+
+                  <g stroke="#c4a879" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M379 205 349 226 335 249M473 211 488 231 491 249M577 204 614 224 628 250" fill="none"
+                      stroke="#9ca4ab" stroke-width="7" />
+                    <path d="m379 205 13 23-45 1m126-18-21 22 39 1m93-30 9 28 44-7" fill="none" stroke="#d4b173"
+                      stroke-width="3" />
+                    <path d="m362 228-9 17m123-14 10 17m116-23 16 18" fill="none" stroke="#5e6873" stroke-width="3" />
+                  </g>
+
+                  <g>
+                    <g transform="translate(344 258)">
+                      <circle r="31" fill="url(#roverWheel)" stroke="#aab0b5" stroke-width="2" />
+                      <circle r="24" fill="none" stroke="#77818a" stroke-width="2" stroke-dasharray="4 3" />
+                      <circle r="16" fill="#242b33" stroke="#d3b77f" stroke-width="2" />
+                      <circle r="6" fill="#d9c08e" />
+                      <path
+                        d="M-22-22-27-27M-7-30-9-36M12-27l4-6M27-12l7-3M30 7l6 2M18 25l4 6M0 31v6M-19 25l-4 6M-30 8l-6 2M-29-10l-6-3"
+                        stroke="#c5cbd0" stroke-width="3" stroke-linecap="round" />
+                    </g>
+                    <g transform="translate(491 260)">
+                      <circle r="31" fill="url(#roverWheel)" stroke="#aab0b5" stroke-width="2" />
+                      <circle r="24" fill="none" stroke="#77818a" stroke-width="2" stroke-dasharray="4 3" />
+                      <circle r="16" fill="#242b33" stroke="#d3b77f" stroke-width="2" />
+                      <circle r="6" fill="#d9c08e" />
+                      <path
+                        d="M-22-22-27-27M-7-30-9-36M12-27l4-6M27-12l7-3M30 7l6 2M18 25l4 6M0 31v6M-19 25l-4 6M-30 8l-6 2M-29-10l-6-3"
+                        stroke="#c5cbd0" stroke-width="3" stroke-linecap="round" />
+                    </g>
+                    <g transform="translate(635 260)">
+                      <circle r="31" fill="url(#roverWheel)" stroke="#aab0b5" stroke-width="2" />
+                      <circle r="24" fill="none" stroke="#77818a" stroke-width="2" stroke-dasharray="4 3" />
+                      <circle r="16" fill="#242b33" stroke="#d3b77f" stroke-width="2" />
+                      <circle r="6" fill="#d9c08e" />
+                      <path
+                        d="M-22-22-27-27M-7-30-9-36M12-27l4-6M27-12l7-3M30 7l6 2M18 25l4 6M0 31v6M-19 25l-4 6M-30 8l-6 2M-29-10l-6-3"
+                        stroke="#c5cbd0" stroke-width="3" stroke-linecap="round" />
+                    </g>
+                  </g>
+
+                  <g stroke="#d7bd8e" stroke-width="2">
+                    <path d="M355 164h-72v32h72m255-32h72v32h-72" fill="url(#roverPanel)" />
+                    <path d="M294 164v32m20-32v32m20-32v32m20-32v32m255-32v32m20-32v32m20-32v32m20-32v32" fill="none"
+                      stroke="#91b6d0" stroke-opacity=".62" stroke-width="1" />
+                    <path d="M355 180h-72m255 0h72" fill="none" stroke="#91b6d0" stroke-opacity=".62"
+                      stroke-width="1" />
+                    <path d="M355 166h-12m267 0h12" fill="none" stroke="#e2c58d" stroke-width="3" />
+                  </g>
+
+                  <g>
+                    <path d="M374 164h239l-12 58H383z" fill="#3b4148" stroke="#d6bd91" stroke-width="2" />
+                    <path d="m385 169 218 0-7 44H392z" fill="url(#roverDeck)" stroke="#f3dcac" stroke-width="1.5" />
+                    <path d="m402 176 35 0-3 28h-34zm42 0h38v28h-38zm45 0h38v28h-38zm45 0h55l-4 28h-51z" fill="#6b5a44"
+                      stroke="#d9bd8a" stroke-width="1" />
+                    <path d="m406 182 25 0m-25 6h25m18-6h29m-29 6h29m17-6h29m-29 6h29m17-6h44" stroke="#f1d8a5"
+                      stroke-opacity=".56" stroke-width="1" />
+                    <rect x="467" y="150" width="80" height="14" rx="3" fill="#d7bd8e" stroke="#fff0cc"
+                      stroke-width="1.5" />
+                    <path d="M477 154h18m8 0h9m8 0h17" stroke="#5e5344" stroke-width="2" />
+                    <circle cx="402" cy="215" r="3" fill="#f7c66f" />
+                    <circle cx="590" cy="215" r="3" fill="#f7c66f" />
+                    <path d="M394 221h199" stroke="#e3c995" stroke-width="2" />
+                  </g>
+
+                  <g fill="none" stroke="#d9c18e" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M529 151v-47l-11-14m11 14 18-14m-18 20 24 6" stroke-width="4" />
+                    <path d="M507 91q22-12 44 0l-3 15h-38z" fill="#303944" stroke-width="2" />
+                    <circle cx="514" cy="98" r="4" fill="#ffbf68" stroke="none" />
+                    <circle cx="543" cy="98" r="4" fill="#9dd6f1" stroke="none" />
+                    <path d="M528 86v-15m0 0 8-8m-8 8-8-8" stroke-width="2" />
+                    <circle cx="528" cy="62" r="3" fill="#ffcf82" stroke="none" />
+                    <path d="M544 78q17-10 28 0m-31-6q21-15 36 0" stroke="#aabfd1" stroke-opacity=".6"
+                      stroke-width="1.5" />
+                  </g>
+
+                  <g fill="none" stroke="#dfc18c" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M587 194 619 204l17 18-22 16m-14-28 5 25m31-18 15 3" stroke-width="5" />
+                    <circle cx="618" cy="204" r="6" fill="#d4b77f" stroke="#f0d5a5" stroke-width="2" />
+                    <circle cx="636" cy="222" r="5" fill="#d4b77f" stroke="#f0d5a5" stroke-width="2" />
+                    <path d="m660 222 12 4-5 10-12-2z" fill="#82919b" stroke="#dce0df" stroke-width="1.5" />
+                    <path d="m670 226 8-7m-3 6 8 1" stroke="#e4d0a7" stroke-width="2" />
+                  </g>
+
+                  <g class="rover-callout" fill="none" stroke="#ffbd63" stroke-width="1.2" stroke-dasharray="3 3">
+                    <path d="M551 82 585 59h15" />
+                    <path d="M327 162 263 137h-48" />
+                    <path d="M506 286 470 316h-94" />
+                    <path d="M671 234 718 253h85" />
+                  </g>
+                  <g class="rover-callout" fill="#efeae0" font-family="JetBrains Mono, monospace" font-size="9"
+                    letter-spacing="1.1">
+                    <text x="605" y="62">STEREO IMAGER</text>
+                    <text x="209" y="140" text-anchor="end">SOLAR ARRAY</text>
+                    <text x="370" y="320" text-anchor="end">ROCKER-BOGIE · 6WD</text>
+                    <text x="820" y="257" text-anchor="end">SAMPLE ARM</text>
+                  </g>
+                  <g class="rover-callout" fill="#ffbd63">
+                    <circle cx="551" cy="82" r="2.5" />
+                    <circle cx="327" cy="162" r="2.5" />
+                    <circle cx="506" cy="286" r="2.5" />
+                    <circle cx="671" cy="234" r="2.5" />
+                  </g>
+                </svg>
+                <div class="rover-hud" aria-hidden="true"><i></i><span>LUNAR SURFACE · ROVER 01</span></div>
+                <div class="rover-location" aria-hidden="true">
+                  <span>TYCHO HIGHLANDS</span>
+                  <small>43.3° S &nbsp;·&nbsp; 11.2° W</small>
+                </div>
+              </div>
+              <div class="pfields">
+                <div class="wide"><span class="lab">Passenger</span><b id="pName">FIRST NAME LAST NAME</b></div>
+                <div><span class="lab">Team</span><b id="pTeam">YOUR TEAM NAME</b></div>
+                <div><span class="lab">Crew</span><b id="pSize">4 pilots</b></div>
+                <div class="wide"><span class="lab">Launch site</span><b>Main Auditorium, Your Campus, Earth</b></div>
+                <div class="wide"><span class="lab">Arrival site</span><b>Demo Stage, Judging Floor</b></div>
+                <div class="accent"><span class="lab">Vehicle</span><b id="pTrack">Signal payload</b></div>
+                <div><span class="lab">Departure</span><b>5 Dec 2026 · 11:00</b></div>
+                <div class="wide accent"><span class="lab">Crew-hours earned</span><b id="pHours">96 crew-hours</b>
+                </div>
+              </div>
+              <svg class="patch" viewBox="0 0 120 120" role="img"
+                aria-label="Innoverce 26 mission patch with Earth and the year 2026">
+                <defs>
+                  <path id="patchArc" d="M60 60 m-45 0 a45 45 0 1 1 90 0 a45 45 0 1 1 -90 0" />
+                </defs>
+                <circle cx="60" cy="60" r="57" fill="#0a0a0c" stroke="currentColor" stroke-width="2" />
+                <circle cx="60" cy="60" r="33" fill="#000000" stroke="currentColor" stroke-width="1" opacity="0.6" />
+                <text font-family="JetBrains Mono, ui-monospace, monospace" font-size="9" letter-spacing="3"
+                  fill="currentColor">
+                  <textPath href="#patchArc">INNOVERCE 26 · LAUNCH CREW · 2026 · </textPath>
+                </text>
+                <defs>
+                  <clipPath id="earthClip">
+                    <circle cx="60" cy="60" r="16" />
+                  </clipPath>
+                </defs>
+                <circle cx="60" cy="60" r="18" fill="#54baff" opacity="0.25" />
+                <g clip-path="url(#earthClip)">
+                  <circle cx="60" cy="60" r="16" fill="#1b73c8" />
+                  <path
+                    d="M42 52l7-5 5 2 2 5-4 3-1 5-5 2-4-4-2-5zm19-11 6 2 2 4-3 4-5-2-3-4zm5 19 6-3 5 3-2 6-5 2-4-3zM52 67l6-3 5 3-1 7-5 4-4-5z"
+                    fill="#7fcf79" />
+                  <path d="M44 49a18 18 0 0 1 25-6 18 18 0 0 0-20 28 18 18 0 0 1-5-22z" fill="#fff" opacity="0.18" />
+                </g>
+                <circle cx="60" cy="60" r="16" fill="none" stroke="#bcecff" stroke-width="1" />
+                <ellipse cx="60" cy="60" rx="25" ry="7.5" fill="none" stroke="#ffb347" stroke-width="1.5"
+                  transform="rotate(-18 60 60)" />
+                <circle cx="38" cy="44" r="1.2" fill="#efeae0" />
+                <circle cx="82" cy="76" r="1.2" fill="#efeae0" />
+                <circle cx="80" cy="42" r="0.9" fill="#efeae0" />
+                <circle cx="42" cy="80" r="0.9" fill="#efeae0" />
+              </svg>
+            </div>
+          </div>
+        </div>
+        <div class="pass-actions">
+          <button class="btn pass-download" id="downloadPass" type="button">Download your passes</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="faq">
+      <p class="kicker">FAQ</p>
+      <h2>Before you launch</h2>
+      <div class="faq">
+        <details>
+          <summary>Who can take part?</summary>
+          <p>Any current college student. Mix colleges and years freely. Teams are 1 to 4 people.</p>
+        </details>
+        <details>
+          <summary>Can I start building before the event?</summary>
+          <p>You can research and sketch ideas. Code must start at T+0, and judges may check your repository history.
+          </p>
+        </details>
+        <details>
+          <summary>What should I bring?</summary>
+          <p>A laptop, charger, college ID and anything you want to hack on, such as boards or sensors. Food and drinks
+            are provided.</p>
+        </details>
+        <details>
+          <summary>Do I need to pick a track now?</summary>
+          <p>No. You can change tracks until the problem statements are released at the opening session.</p>
+        </details>
+      </div>
+    </section>
+
+    <footer><span>INNOVERCE 26 · 5–6 DEC 2026</span><span>Rendered live with Three.js</span></footer>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+    (function () {
+      var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var T = reduce ? 0 : 1;
+
+      /* ---------- data ---------- */
+      var TRACKS = [
+        {
+          id: 'ai', name: 'Signal', tag: 'AI & ML', color: 0xd3d6db, css: '#d3d6db',
+          desc: 'Build models and tools that make sense of messy information.',
+          brief: 'Sample brief: turn long government notices into clear summaries in Kannada, Hindi and English for people who cannot parse the fine print.',
+          stack: ['PyTorch', 'scikit-learn', 'LangChain', 'ONNX'], prize: '₹10,000 + mentor session with an ML engineer'
+        },
+        {
+          id: 'eco', name: 'Terra', tag: 'Sustainability', color: 0xa9c4b0, css: '#a9c4b0',
+          desc: 'Use cheap sensors, open data and good design to cut waste.',
+          brief: 'Sample brief: track power and water use across a campus block with low-cost sensors, then show where the biggest savings are.',
+          stack: ['ESP32', 'MQTT', 'InfluxDB', 'Grafana'], prize: '₹10,000 + hardware kit'
+        },
+        {
+          id: 'health', name: 'Helix', tag: 'HealthTech', color: 0xe8805f, css: '#e8805f',
+          desc: 'Help care reach people who live far from it.',
+          brief: 'Sample brief: help a rural clinic sort patients by urgency when the nearest specialist is hours away.',
+          stack: ['FHIR', 'React Native', 'Firebase', 'TensorFlow Lite'], prize: '₹10,000 + clinic pilot introduction'
+        },
+        {
+          id: 'open', name: 'Wildcard', tag: 'Open innovation', color: 0xffb347, css: '#ffb347',
+          desc: 'Bring your own problem. Surprise the judges.',
+          brief: 'Sample brief: anything that works live. Originality and a clean demo count as much as the technology.',
+          stack: ['Any stack', 'Any hardware', 'Any idea'], prize: '₹10,000 + featured demo slot'
+        }
+      ];
+
+      /* ---------- helpers ---------- */
+      function rng(seed) { return function () { seed |= 0; seed = seed + 0x6D2B79F5 | 0; var t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+      function mkRenderer(canvas) {
+        try { var r = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true }); r.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2)); return r; } catch (e) { return null; }
+      }
+      function fit(r, cam, el) { var w = el.clientWidth || 1, h = el.clientHeight || 1; r.setSize(w, h, false); cam.aspect = w / h; cam.updateProjectionMatrix(); }
+      function loop(el, frame) {
+        var vis = true, running = true, last = performance.now();
+        function tick(now) { if (!vis) { running = false; return; } var dt = Math.min((now - last) / 1000, 0.05); last = now; frame(now / 1000, dt); requestAnimationFrame(tick); }
+        if ('IntersectionObserver' in window) {
+          new IntersectionObserver(function (es) { vis = es[0].isIntersecting; if (vis && !running) { running = true; last = performance.now(); requestAnimationFrame(tick); } }).observe(el);
+        }
+        requestAnimationFrame(tick);
+      }
+      function bindDrag(el, st, onTap, onPinch) {
+        var down = false, lx = 0, ly = 0, moved = 0, activePointers = {}, pinchDistance = 0;
+        el.addEventListener('pointerdown', function (e) {
+          activePointers[e.pointerId] = { x: e.clientX, y: e.clientY };
+          var ids = Object.keys(activePointers);
+          if (ids.length > 1) {
+            down = false; moved = 6;
+            var a = activePointers[ids[0]], b = activePointers[ids[1]];
+            pinchDistance = Math.hypot(a.x - b.x, a.y - b.y);
+          } else { down = true; lx = e.clientX; ly = e.clientY; moved = 0; }
+          try { el.setPointerCapture(e.pointerId); } catch (x) { }
+          el.style.cursor = 'grabbing';
+        });
+        el.addEventListener('pointermove', function (e) {
+          var r = el.getBoundingClientRect(); st.mx = ((e.clientX - r.left) / r.width) * 2 - 1; st.my = ((e.clientY - r.top) / r.height) * 2 - 1;
+          if (activePointers[e.pointerId]) { activePointers[e.pointerId].x = e.clientX; activePointers[e.pointerId].y = e.clientY; }
+          var ids = Object.keys(activePointers);
+          if (ids.length > 1) {
+            down = false; moved = 6;
+            var a = activePointers[ids[0]], b = activePointers[ids[1]], nextDistance = Math.hypot(a.x - b.x, a.y - b.y);
+            if (pinchDistance > 0 && nextDistance > 0 && onPinch) onPinch(pinchDistance, nextDistance);
+            pinchDistance = nextDistance;
+            return;
+          }
+          if (down) { var dx = e.clientX - lx, dy = e.clientY - ly; lx = e.clientX; ly = e.clientY; moved += Math.abs(dx) + Math.abs(dy); st.vy += dx * 0.004; st.vx += dy * 0.004; }
+        });
+        el.addEventListener('pointerup', function (e) {
+          var wasPinching = Object.keys(activePointers).length > 1;
+          delete activePointers[e.pointerId];
+          pinchDistance = 0;
+          if (wasPinching) { down = false; moved = 6; el.style.cursor = ''; return; }
+          if (!down) return;
+          down = false; el.style.cursor = ''; if (moved < 6 && onTap) onTap();
+        });
+        el.addEventListener('pointercancel', function (e) { delete activePointers[e.pointerId]; pinchDistance = 0; down = false; el.style.cursor = ''; });
+        el.addEventListener('pointerleave', function () { st.mx = 0; st.my = 0; });
+      }
+      function mat(color, o) { return new THREE.MeshBasicMaterial(Object.assign({ color: color }, o || {})); }
+
+      /* ---------- deep-space backdrop ---------- */
+      (function space() {
+        var canvas = document.getElementById('space');
+        if (!canvas || !window.THREE) return;
+        var renderer = mkRenderer(canvas);
+        if (!renderer) { canvas.style.display = 'none'; return; }
+        var FOV = 50, CZ = 12;
+        var scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(FOV, 1, 0.1, 200);
+        cam.position.set(0, 0, CZ);
+        scene.add(new THREE.AmbientLight(0x80808a, 0.6));
+        var sun = new THREE.DirectionalLight(0xffe6c4, 1.6); sun.position.set(-7, 5, 8); scene.add(sun);
+        var r = rng(99);
+        function half(z) { var h = Math.tan(FOV * Math.PI / 360) * (CZ - z); return { w: h * cam.aspect, h: h }; }
+
+        function mkCanvas(w, h) { var c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
+        var dotTex = (function () {
+          var c = mkCanvas(32, 32), g = c.getContext('2d'), gr = g.createRadialGradient(16, 16, 0, 16, 16, 16);
+          gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.35, 'rgba(255,255,255,0.55)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+          g.fillStyle = gr; g.fillRect(0, 0, 32, 32); return new THREE.CanvasTexture(c);
+        })();
+        function bandTex(cols, seed) {
+          var c = mkCanvas(512, 256), g = c.getContext('2d'), rr = rng(seed), y = 0, i;
+          while (y < 256) { var h = 6 + rr() * 26; g.fillStyle = cols[Math.floor(rr() * cols.length)]; g.fillRect(0, y, 512, h); y += h; }
+          for (i = 0; i < 70; i++) { g.fillStyle = rr() > 0.5 ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.14)'; g.fillRect(0, rr() * 256, 512, 1 + rr() * 3); }
+          for (i = 0; i < 14; i++) { g.fillStyle = 'rgba(255,255,255,0.08)'; g.beginPath(); g.ellipse(rr() * 512, rr() * 256, 10 + rr() * 40, 2 + rr() * 5, 0, 0, 6.283); g.fill(); }
+          return new THREE.CanvasTexture(c);
+        }
+        function craterTex(base, seed) {
+          var c = mkCanvas(512, 256), g = c.getContext('2d'), rr = rng(seed), i;
+          g.fillStyle = base; g.fillRect(0, 0, 512, 256);
+          for (i = 0; i < 500; i++) { g.fillStyle = (rr() > 0.5 ? 'rgba(255,255,255,' : 'rgba(0,0,0,') + (0.03 + rr() * 0.07) + ')'; g.fillRect(rr() * 512, rr() * 256, 2 + rr() * 6, 2 + rr() * 6); }
+          for (i = 0; i < 46; i++) {
+            var x = rr() * 512, y = rr() * 256, rad = 4 + rr() * 20;
+            g.fillStyle = 'rgba(0,0,0,0.28)'; g.beginPath(); g.arc(x, y, rad, 0, 6.283); g.fill();
+            g.strokeStyle = 'rgba(255,255,255,0.18)'; g.lineWidth = 1.5; g.beginPath(); g.arc(x - 1, y - 1, rad, 0, 6.283); g.stroke();
+          }
+          return new THREE.CanvasTexture(c);
+        }
+        function ringTex() {
+          var c = mkCanvas(512, 512), g = c.getContext('2d'), rr = rng(4);
+          for (var rad = 130; rad < 256; rad += 2) {
+            var f = rad / 256; if (f > 0.78 && f < 0.82) continue;
+            g.strokeStyle = 'rgba(' + (210 + rr() * 30 | 0) + ',' + (176 + rr() * 30 | 0) + ',' + (125 + rr() * 30 | 0) + ',' + (0.18 + rr() * 0.5) + ')';
+            g.lineWidth = 2.2; g.beginPath(); g.arc(256, 256, rad, 0, 6.283); g.stroke();
+          }
+          return new THREE.CanvasTexture(c);
+        }
+
+        /* stars: three depth layers drifting left at different speeds */
+        var layers = [
+          { n: 520, z: -26, size: 0.19, sp: 0.12, col: 0xdad7d0, op: 0.78 },
+          { n: 260, z: -16, size: 0.18, sp: 0.28, col: 0xf0ece4, op: 0.92 },
+          { n: 100, z: -8, size: 0.16, sp: 0.55, col: 0xffe2b8, op: 1 }
+        ];
+        layers.forEach(function (L) {
+          L.arr = new Float32Array(L.n * 3); L.geo = new THREE.BufferGeometry(); L.geo.setAttribute('position', new THREE.BufferAttribute(L.arr, 3));
+          L.mat = new THREE.PointsMaterial({ color: L.col, size: L.size, map: dotTex, transparent: true, opacity: L.op, depthWrite: false, sizeAttenuation: true });
+          L.pts = new THREE.Points(L.geo, L.mat); L.pts.frustumCulled = false; scene.add(L.pts);
+        });
+        function layoutStars() {
+          layers.forEach(function (L) {
+            var h = half(L.z); L.hw = h.w + 1; L.hh = h.h + 1;
+            for (var i = 0; i < L.n; i++) { L.arr[i * 3] = (r() * 2 - 1) * L.hw; L.arr[i * 3 + 1] = (r() * 2 - 1) * L.hh; L.arr[i * 3 + 2] = L.z + (r() - 0.5) * 2; }
+            L.geo.attributes.position.needsUpdate = true;
+          });
+        }
+
+        /* planets */
+        var defs = [
+          { tex: bandTex(['#c8a06a', '#b98a52', '#e0c08a', '#a67a45', '#d9b27a'], 3), R: 1.5, z: -7, nx: 0.82, ny: 0.8, ring: true, ax: 0.5, ay: 0.3, sp: 0.05, ph: 0.4, spin: 0.03, par: 1.4 },
+          { tex: bandTex(['#9aa0a8', '#c9ced4', '#6d737b', '#e3e6ea', '#868c94'], 8), R: 0.85, z: -5, nx: 0.06, ny: 0.42, glow: 0xd3d6db, ax: 0.4, ay: 0.35, sp: 0.07, ph: 2.1, spin: 0.05, par: 2.0 },
+          { tex: craterTex('#7a6a62', 5), R: 0.42, z: -3, nx: 0.9, ny: 0.2, ax: 0.25, ay: 0.3, sp: 0.09, ph: 4.0, spin: 0.08, par: 2.8 },
+          { tex: bandTex(['#4a9a7a', '#a9c4b0', '#2e6f55'], 12), R: 0.3, z: -13, nx: 0.3, ny: 0.07, ax: 0.3, ay: 0.2, sp: 0.06, ph: 5.2, spin: 0.04, par: 0.8 }
+        ];
+        defs.forEach(function (d) {
+          var g = new THREE.Group(), body = new THREE.Mesh(new THREE.SphereGeometry(d.R, 48, 32), new THREE.MeshStandardMaterial({ map: d.tex, roughness: 0.92, metalness: 0 }));
+          g.add(body);
+          if (d.glow) g.add(new THREE.Mesh(new THREE.SphereGeometry(d.R * 1.14, 32, 24), new THREE.MeshBasicMaterial({ color: d.glow, transparent: true, opacity: 0.14, side: THREE.BackSide, blending: THREE.AdditiveBlending, depthWrite: false })));
+          if (d.ring) {
+            var rm = new THREE.Mesh(new THREE.PlaneGeometry(d.R * 5, d.R * 5), new THREE.MeshBasicMaterial({ map: ringTex(), transparent: true, opacity: 0.7, side: THREE.DoubleSide, depthWrite: false }));
+            rm.rotation.x = -1.2; g.add(rm); g.rotation.z = 0.38;
+          }
+          d.g = g; d.body = body; scene.add(g);
+        });
+        function layoutPlanets() {
+          var s = cam.aspect < 1 ? 0.62 : 1;
+          defs.forEach(function (d) { var h = half(d.z); d.bx = (d.nx - 0.5) * 2 * h.w * 0.92; d.by = (d.ny - 0.5) * 2 * h.h * 0.92; d.g.scale.setScalar(s); });
+        }
+
+        /* shooting star */
+        var sGeo = new THREE.BufferGeometry(); sGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(6), 3));
+        sGeo.setAttribute('color', new THREE.BufferAttribute(new Float32Array([1, 1, 1, 0, 0, 0]), 3));
+        var shoot = new THREE.Line(sGeo, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false }));
+        shoot.frustumCulled = false; shoot.visible = false; scene.add(shoot);
+        var shootT = -1, nextShoot = 5 + r() * 5, sx = 0, sy = 0;
+
+        function onResize() { fit(renderer, cam, canvas); layoutStars(); layoutPlanets(); }
+        onResize(); window.addEventListener('resize', onResize);
+
+        var prog = 0;
+        loop(canvas, function (t, dt) {
+          var max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight), target = Math.min(1, Math.max(0, window.scrollY / max));
+          prog += (target - prog) * Math.min(1, dt * 3);
+          layers.forEach(function (L) {
+            var a = L.arr, step = L.sp * dt * T;
+            for (var i = 0; i < L.n; i++) { a[i * 3] -= step; if (a[i * 3] < -L.hw) { a[i * 3] = L.hw; a[i * 3 + 1] = (Math.random() * 2 - 1) * L.hh; } }
+            L.geo.attributes.position.needsUpdate = true;
+            L.mat.opacity = L.op * (0.85 + 0.15 * Math.sin(t * (0.4 + L.sp) * T + L.z));
+          });
+          defs.forEach(function (d) {
+            d.body.rotation.y += d.spin * dt * T;
+            d.g.position.set(d.bx + Math.sin(t * d.sp + d.ph) * d.ax * T, d.by + Math.cos(t * d.sp * 0.8 + d.ph) * d.ay * T + (prog - 0.5) * d.par, d.z);
+          });
+          if (!reduce) {
+            nextShoot -= dt;
+            if (nextShoot <= 0 && shootT < 0) { var hh = half(-10); shootT = 0; sx = (r() * 0.8 - 0.1) * hh.w; sy = (0.2 + r() * 0.7) * hh.h; nextShoot = 9 + r() * 9; }
+            if (shootT >= 0) {
+              shootT += dt; var k = shootT / 1.1;
+              if (k >= 1) { shootT = -1; shoot.visible = false; }
+              else {
+                var hx = sx - k * 7, hy = sy - k * 3, p = sGeo.attributes.position.array;
+                p[0] = hx; p[1] = hy; p[2] = -10; p[3] = hx + 2, p[4] = hy + 0.86, p[5] = -10;
+                sGeo.attributes.position.needsUpdate = true; shoot.material.opacity = 1 - k * k; shoot.visible = true;
+              }
+            }
+          }
+          renderer.render(scene, cam);
+        });
+      })();
+
+      /* ---------- hero rig ---------- */
+      (function hero() {
+        var stage = document.getElementById('heroStage'), canvas = document.getElementById('heroCanvas');
+        if (!window.THREE) { stage.classList.add('nowebgl'); return; }
+        var renderer = mkRenderer(canvas); if (!renderer) { stage.classList.add('nowebgl'); return; }
+        var scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(42, 1, 0.1, 100); cam.position.set(0, 0, 8.2);
+        var zoomTarget = 8.2, minZoom = 5.8, maxZoom = 12;
+        scene.add(new THREE.AmbientLight(0x8a8a92, 0.9));
+        var l1 = new THREE.PointLight(0xffb347, 1.4, 20); l1.position.set(3, 2, 4); scene.add(l1);
+        var l2 = new THREE.PointLight(0xd3d6db, 1.1, 20); l2.position.set(-4, -2, 3); scene.add(l2);
+
+        var rig = new THREE.Group(); scene.add(rig);
+        function earthTex() {
+          var c = document.createElement('canvas'); c.width = 1024; c.height = 512;
+          var g = c.getContext('2d'), mask = document.createElement('canvas'), mg = mask.getContext('2d'), rr = rng(2);
+          mask.width = c.width; mask.height = c.height;
+          g.fillStyle = '#020305'; g.fillRect(0, 0, c.width, c.height);
+          var continents = [
+            [[55, 90], [94, 62], [145, 70], [174, 98], [164, 128], [138, 140], [126, 175], [100, 183], [84, 153], [58, 145], [42, 118]],
+            [[145, 190], [181, 204], [197, 239], [188, 276], [174, 312], [157, 355], [143, 330], [137, 287], [119, 252], [125, 218]],
+            [[274, 91], [311, 77], [348, 93], [359, 118], [340, 139], [309, 141], [285, 126]],
+            [[291, 148], [329, 146], [359, 174], [369, 214], [353, 252], [336, 291], [311, 320], [294, 295], [288, 257], [273, 222], [277, 184]],
+            [[426, 93], [460, 76], [500, 84], [519, 104], [550, 104], [573, 122], [562, 145], [527, 150], [508, 172], [474, 165], [454, 145], [426, 139]],
+            [[491, 181], [531, 169], [560, 187], [571, 223], [559, 259], [542, 300], [523, 326], [504, 298], [495, 265], [479, 235]],
+            [[589, 98], [627, 77], [677, 82], [715, 100], [759, 95], [798, 112], [830, 106], [872, 122], [896, 150], [878, 169], [842, 162], [820, 182], [785, 170], [754, 184], [720, 164], [690, 177], [665, 155], [632, 164], [608, 142]],
+            [[683, 188], [718, 176], [748, 194], [761, 229], [750, 266], [730, 292], [711, 271], [702, 236]],
+            [[810, 285], [842, 270], [867, 284], [870, 309], [848, 326], [820, 316]],
+            [[916, 74], [947, 67], [963, 82], [951, 101], [927, 101]]
+          ];
+          continents.forEach(function (points) {
+            mg.beginPath(); mg.moveTo(points[0][0], points[0][1]);
+            for (var i = 1; i < points.length; i++) mg.lineTo(points[i][0], points[i][1]);
+            mg.closePath(); mg.fillStyle = '#fff'; mg.fill();
+          });
+          var land = mg.getImageData(0, 0, mask.width, mask.height).data;
+          for (var j = 0; j < 13000; j++) {
+            var x = Math.floor(rr() * c.width), y = Math.floor(rr() * c.height);
+            if (land[(y * c.width + x) * 4 + 3] > 0) {
+              g.fillStyle = rr() > 0.18 ? '#fff' : '#b9d9f2';
+              g.beginPath(); g.arc(x, y, 0.7 + rr() * 0.8, 0, 6.283); g.fill();
+            }
+          }
+          var tex = new THREE.CanvasTexture(c); tex.wrapS = THREE.RepeatWrapping; return tex;
+        }
+        var earth = new THREE.Mesh(
+          new THREE.SphereGeometry(0.98, 64, 48),
+          new THREE.MeshStandardMaterial({ map: earthTex(), roughness: 1, metalness: 0 })
+        );
+        rig.add(earth);
+        var wire = new THREE.Mesh(
+          new THREE.SphereGeometry(0.995, 24, 16),
+          mat(0xc9e8ff, { wireframe: true, transparent: true, opacity: 0.5, depthWrite: false })
+        );
+        rig.add(wire);
+        var atmosphere = new THREE.Mesh(
+          new THREE.SphereGeometry(1.08, 48, 32),
+          new THREE.MeshBasicMaterial({ color: 0xbcecff, transparent: true, opacity: 0.08, side: THREE.BackSide, blending: THREE.AdditiveBlending, depthWrite: false })
+        );
+        rig.add(atmosphere);
+
+        var spinners = [], defs = [
+          { r: 1.9, tx: 1.15, ty: 0.2, col: 0xd3d6db, n: 4, sp: 0.5 },
+          { r: 2.4, tx: -0.5, ty: 0.9, col: 0xffb347, n: 5, sp: -0.34 },
+          { r: 2.9, tx: 0.2, ty: -0.8, col: 0xf0ece4, n: 3, sp: 0.24 }
+        ];
+        defs.forEach(function (d, i) {
+          var pivot = new THREE.Group(); pivot.rotation.set(d.tx, d.ty, 0);
+          var spin = new THREE.Group(); pivot.add(spin);
+          spin.add(new THREE.Mesh(new THREE.TorusGeometry(d.r, 0.011, 8, 160), mat(d.col, { transparent: true, opacity: 0.55 })));
+          for (var k = 0; k < d.n; k++) {
+            var a = (k / d.n) * Math.PI * 2, sat = new THREE.Group();
+            var body = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.1), new THREE.MeshStandardMaterial({ color: d.col, metalness: 0.5, roughness: 0.3 }));
+            var pan = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.07, 0.006), new THREE.MeshStandardMaterial({ color: 0x3b3b42, metalness: 0.6, roughness: 0.4 }));
+            sat.add(body); sat.add(pan); sat.position.set(Math.cos(a) * d.r, Math.sin(a) * d.r, 0); sat.userData.ph = Math.random() * 6;
+            spin.add(sat);
+          }
+          spinners.push({ spin: spin, sp: d.sp, sats: spin.children.slice(1) });
+          rig.add(pivot);
+        });
+
+        var r = rng(7), sp = new Float32Array(900 * 3);
+        for (var i = 0; i < 900; i++) { var u = r() * 2 - 1, th = r() * 6.283, rr = Math.sqrt(1 - u * u), d = 7 + r() * 9; sp[i * 3] = rr * Math.cos(th) * d; sp[i * 3 + 1] = u * d; sp[i * 3 + 2] = rr * Math.sin(th) * d - 4; }
+        var sg = new THREE.BufferGeometry(); sg.setAttribute('position', new THREE.BufferAttribute(sp, 3));
+        var stars = new THREE.Points(sg, new THREE.PointsMaterial({ color: 0xe6e2da, size: 0.04, transparent: true, opacity: 0.8 })); scene.add(stars);
+
+        var st = { mx: 0, my: 0, vx: 0, vy: 0 }, ripples = [], count = 0, hud = document.getElementById('hudPulse');
+        function pulse() {
+          count++; hud.textContent = 'Pulses ' + (count < 10 ? '0' : '') + count;
+          var m = new THREE.Mesh(new THREE.TorusGeometry(1, 0.012, 8, 120), mat(count % 2 ? 0xffb347 : 0xd3d6db, { transparent: true, opacity: 0.9 }));
+          m.userData.born = performance.now(); scene.add(m); ripples.push(m);
+        }
+        bindDrag(canvas, st, pulse, function (previousDistance, distance) {
+          setZoom(zoomTarget * previousDistance / distance);
+        });
+        function setZoom(distance) { zoomTarget = Math.max(minZoom, Math.min(maxZoom, distance)); }
+        document.getElementById('zoomIn').addEventListener('click', function () { setZoom(zoomTarget - 0.8); });
+        document.getElementById('zoomOut').addEventListener('click', function () { setZoom(zoomTarget + 0.8); });
+        document.getElementById('zoomReset').addEventListener('click', function () { setZoom(8.2); });
+        var wireToggle = document.getElementById('wireToggle');
+        wireToggle.addEventListener('click', function () {
+          wire.visible = !wire.visible;
+          wireToggle.setAttribute('aria-pressed', String(wire.visible));
+          wireToggle.setAttribute('aria-label', (wire.visible ? 'Disable' : 'Enable') + ' Earth wireframe');
+          wireToggle.textContent = 'WIRE ' + (wire.visible ? 'ON' : 'OFF');
+        });
+        canvas.addEventListener('wheel', function (e) {
+          e.preventDefault();
+          setZoom(zoomTarget + (e.deltaY > 0 ? 0.6 : -0.6));
+        }, { passive: false });
+        function size() { fit(renderer, cam, stage); }
+        size(); if ('ResizeObserver' in window) new ResizeObserver(size).observe(stage); else window.addEventListener('resize', size);
+
+        var rotX = 0.25, rotY = 0;
+        loop(stage, function (t, dt) {
+          rotY += st.vy; rotX += st.vx; st.vy *= 0.93; st.vx *= 0.93; rotX += (0.25 - rotX) * 0.01;
+          rig.rotation.y = rotY + Math.sin(t * 0.2) * 0.45 * T; rig.rotation.x = rotX + Math.sin(t * 0.13) * 0.08 * T;
+          earth.rotation.y += 0.12 * dt * T; wire.rotation.y = earth.rotation.y;
+          cam.position.z += (zoomTarget - cam.position.z) * Math.min(1, dt * 6);
+          spinners.forEach(function (s) { s.spin.rotation.z += s.sp * dt * T; s.sats.forEach(function (m) { m.rotation.x = t * 1.4 * T + m.userData.ph; }); });
+          stars.rotation.y = t * 0.01 * T;
+          cam.position.x += (st.mx * 0.6 - cam.position.x) * 0.05; cam.position.y += (-st.my * 0.45 - cam.position.y) * 0.05; cam.lookAt(0, 0, 0);
+          var now = performance.now();
+          for (var i = ripples.length - 1; i >= 0; i--) {
+            var m = ripples[i], k = (now - m.userData.born) / 1300;
+            if (k >= 1) { scene.remove(m); m.geometry.dispose(); m.material.dispose(); ripples.splice(i, 1); continue; }
+            m.scale.setScalar(1 + k * 3.6); m.material.opacity = 0.9 * (1 - k);
+          }
+          renderer.render(scene, cam);
+        });
+      })();
+
+      /* ---------- track models ---------- */
+      function buildNet(col) {
+        var g = new THREE.Group(), r = rng(11), pts = [];
+        for (var i = 0; i < 28; i++) { var u = r() * 2 - 1, th = r() * 6.283, rr = Math.sqrt(1 - u * u), d = 0.85 + r() * 0.55; pts.push(new THREE.Vector3(rr * Math.cos(th) * d, u * d, rr * Math.sin(th) * d)); }
+        var nodes = [], geo = new THREE.SphereGeometry(0.065, 12, 12);
+        pts.forEach(function (p, i) { var m = new THREE.Mesh(geo, mat(i % 7 === 0 ? 0xffb347 : col)); m.position.copy(p); m.userData.ph = i; g.add(m); nodes.push(m); });
+        var lp = [];
+        for (var a = 0; a < pts.length; a++) for (var b = a + 1; b < pts.length; b++) if (pts[a].distanceTo(pts[b]) < 1.0) lp.push(pts[a].x, pts[a].y, pts[a].z, pts[b].x, pts[b].y, pts[b].z);
+        var lg = new THREE.BufferGeometry(); lg.setAttribute('position', new THREE.Float32BufferAttribute(lp, 3));
+        g.add(new THREE.LineSegments(lg, new THREE.LineBasicMaterial({ color: col, transparent: true, opacity: 0.4 })));
+        g.userData.update = function (t) { nodes.forEach(function (n) { n.scale.setScalar(1 + 0.45 * Math.sin(t * 2 + n.userData.ph) * T); }); g.rotation.y = t * 0.2 * T; };
+        return g;
+      }
+      function buildGlobe(col) {
+        var g = new THREE.Group();
+        g.add(new THREE.Mesh(new THREE.SphereGeometry(1.05, 40, 28), new THREE.MeshStandardMaterial({ color: 0x0c1410, roughness: 0.8 })));
+        g.add(new THREE.Mesh(new THREE.SphereGeometry(1.12, 20, 14), mat(col, { wireframe: true, transparent: true, opacity: 0.22 })));
+        var r = rng(5), p = [];
+        while (p.length < 700 * 3) { var u = r() * 2 - 1, th = r() * 6.283, rr = Math.sqrt(1 - u * u), x = rr * Math.cos(th), y = u, z = rr * Math.sin(th); if (Math.sin(3 * x + 1) + Math.sin(4 * y + 1.5) + Math.cos(5 * z) > 0.7) p.push(x * 1.1, y * 1.1, z * 1.1); }
+        var pg = new THREE.BufferGeometry(); pg.setAttribute('position', new THREE.Float32BufferAttribute(p, 3));
+        g.add(new THREE.Points(pg, new THREE.PointsMaterial({ color: col, size: 0.045 })));
+        var orb = new THREE.Group(); orb.rotation.x = 0.9; g.add(orb);
+        orb.add(new THREE.Mesh(new THREE.TorusGeometry(1.55, 0.008, 6, 120), mat(0xf0ece4, { transparent: true, opacity: 0.4 })));
+        var moon = new THREE.Mesh(new THREE.SphereGeometry(0.1, 16, 16), mat(0xffb347)); moon.position.x = 1.55; var mp = new THREE.Group(); mp.add(moon); orb.add(mp);
+        g.userData.update = function (t) { g.rotation.y = t * 0.25 * T; mp.rotation.z = t * 0.8 * T; };
+        return g;
+      }
+      function buildHelix(col) {
+        var g = new THREE.Group(), N = 40, sa = new THREE.SphereGeometry(0.075, 12, 12), lp = [];
+        for (var i = 0; i < N; i++) {
+          var f = i / (N - 1), a = f * Math.PI * 4, y = (f - 0.5) * 3.0, p1 = new THREE.Vector3(Math.cos(a) * 0.62, y, Math.sin(a) * 0.62), p2 = new THREE.Vector3(Math.cos(a + Math.PI) * 0.62, y, Math.sin(a + Math.PI) * 0.62);
+          var m1 = new THREE.Mesh(sa, mat(col)), m2 = new THREE.Mesh(sa, mat(0xd3d6db)); m1.position.copy(p1); m2.position.copy(p2); g.add(m1); g.add(m2);
+          if (i % 2 === 0) lp.push(p1.x, p1.y, p1.z, p2.x, p2.y, p2.z);
+        }
+        var lg = new THREE.BufferGeometry(); lg.setAttribute('position', new THREE.Float32BufferAttribute(lp, 3));
+        g.add(new THREE.LineSegments(lg, new THREE.LineBasicMaterial({ color: 0xf0ece4, transparent: true, opacity: 0.35 })));
+        g.userData.update = function (t) { g.rotation.y = t * 0.55 * T; g.rotation.z = 0.25; };
+        return g;
+      }
+      function buildCubes(col) {
+        var g = new THREE.Group(), r = rng(21), box = new THREE.BoxGeometry(0.46, 0.46, 0.46), eg = new THREE.EdgesGeometry(box), items = [];
+        for (var x = -1; x <= 1; x++) for (var y = -1; y <= 1; y++) for (var z = -1; z <= 1; z++) {
+          if (r() < 0.3 && !(x === 0 && y === 0 && z === 0)) continue;
+          var c = new THREE.Group(); c.position.set(x * 0.66, y * 0.66, z * 0.66);
+          c.add(new THREE.LineSegments(eg, new THREE.LineBasicMaterial({ color: col })));
+          if (r() < 0.3) c.add(new THREE.Mesh(box, new THREE.MeshStandardMaterial({ color: col, metalness: 0.3, roughness: 0.5, transparent: true, opacity: 0.55 })));
+          c.userData.ph = r() * 6; g.add(c); items.push(c);
+        }
+        g.userData.update = function (t) { items.forEach(function (c) { c.scale.setScalar(0.85 + 0.15 * Math.sin(t * 1.6 + c.userData.ph) * T); }); g.rotation.y = t * 0.3 * T; g.rotation.x = 0.4 + Math.sin(t * 0.4) * 0.15 * T; };
+        return g;
+      }
+      var BUILD = { ai: buildNet, eco: buildGlobe, health: buildHelix, open: buildCubes };
+
+      /* ---------- tracks UI + stage ---------- */
+      (function tracks() {
+        var stage = document.getElementById('trackStage'), canvas = document.getElementById('trackCanvas'), box = document.getElementById('tracksBox');
+        var tabs = document.getElementById('tabs'), sel = document.getElementById('fTrack'), active = 0, models = [], webgl = !!window.THREE, renderer, scene, cam, rig;
+        var st = { mx: 0, my: 0, vx: 0, vy: 0 };
+
+        TRACKS.forEach(function (tr, i) {
+          var b = document.createElement('button'); b.className = 'tab'; b.type = 'button'; b.setAttribute('role', 'tab'); b.id = 'tab-' + tr.id;
+          b.innerHTML = '<small>' + tr.tag + '</small><strong>' + tr.name + '</strong>';
+          b.addEventListener('click', function () { choose(i); });
+          b.addEventListener('keydown', function (e) { if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { choose((active + 1) % TRACKS.length); tabs.children[active].focus(); } if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { choose((active + TRACKS.length - 1) % TRACKS.length); tabs.children[active].focus(); } });
+          tabs.appendChild(b);
+          var o = document.createElement('option'); o.value = tr.name; o.textContent = tr.name + ' · ' + tr.tag; sel.appendChild(o);
+        });
+
+        function choose(i) {
+          active = i; var tr = TRACKS[i];
+          box.style.setProperty('--c', tr.css);
+          Array.prototype.forEach.call(tabs.children, function (b, k) { b.setAttribute('aria-selected', k === i ? 'true' : 'false'); b.tabIndex = k === i ? 0 : -1; });
+          document.getElementById('tName').textContent = tr.name + ' · ' + tr.tag;
+          document.getElementById('tDesc').textContent = tr.desc;
+          document.getElementById('tBrief').textContent = tr.brief;
+          document.getElementById('tPrize').innerHTML = '<b>Track prize</b> ' + tr.prize;
+          document.getElementById('hudTrack').textContent = 'Payload / ' + tr.name;
+          var ul = document.getElementById('tStack'); ul.innerHTML = '';
+          tr.stack.forEach(function (s) { var li = document.createElement('li'); li.textContent = s; ul.appendChild(li); });
+        }
+        choose(0);
+        window.__chooseTrack = function (name) { for (var i = 0; i < TRACKS.length; i++) if (TRACKS[i].name === name) choose(i); };
+
+        if (!webgl) { stage.classList.add('nowebgl'); return; }
+        renderer = mkRenderer(canvas); if (!renderer) { stage.classList.add('nowebgl'); return; }
+        scene = new THREE.Scene(); cam = new THREE.PerspectiveCamera(40, 1, 0.1, 50); cam.position.set(0, 0, 5.2);
+        scene.add(new THREE.AmbientLight(0x8a8a92, 0.9));
+        var pl = new THREE.PointLight(0xffffff, 1.2, 20); pl.position.set(3, 3, 4); scene.add(pl);
+        rig = new THREE.Group(); scene.add(rig);
+        TRACKS.forEach(function (tr, i) { var m = BUILD[tr.id](tr.color); m.scale.setScalar(i === 0 ? 1 : 0.001); m.visible = i === 0; rig.add(m); models.push(m); });
+        bindDrag(canvas, st, null);
+        function size() { fit(renderer, cam, stage); }
+        size(); if ('ResizeObserver' in window) new ResizeObserver(size).observe(stage); else window.addEventListener('resize', size);
+        var rx = 0.15, ry = 0;
+        loop(stage, function (t, dt) {
+          ry += st.vy; rx += st.vx; st.vy *= 0.93; st.vx *= 0.93; rx += (0.15 - rx) * 0.02;
+          rig.rotation.y = ry; rig.rotation.x = rx;
+          models.forEach(function (m, i) {
+            var target = i === active ? 1 : 0, s = m.scale.x, ns = s + (target - s) * Math.min(1, dt * 7);
+            if (ns < 0.01 && target === 0) { m.visible = false; m.scale.setScalar(0.001); } else { m.visible = true; m.scale.setScalar(Math.max(ns, 0.001)); }
+            if (m.visible) m.userData.update(t);
+          });
+          cam.position.x += (st.mx * 0.4 - cam.position.x) * 0.05; cam.position.y += (-st.my * 0.3 - cam.position.y) * 0.05; cam.lookAt(0, 0, 0);
+          renderer.render(scene, cam);
+        });
+      })();
+
+      /* ---------- countdown ---------- */
+      (function countdown() {
+        var target = new Date('2026-12-05T11:00:00+05:30').getTime();
+        var d = document.getElementById('cd'), h = document.getElementById('ch'), m = document.getElementById('cm'), s = document.getElementById('cs');
+        function p(n) { return n < 10 ? '0' + n : '' + n; }
+        function tick() {
+          var diff = Math.max(0, target - Date.now()), sec = Math.floor(diff / 1000);
+          d.textContent = p(Math.floor(sec / 86400)); h.textContent = p(Math.floor(sec % 86400 / 3600)); m.textContent = p(Math.floor(sec % 3600 / 60)); s.textContent = p(sec % 60);
+        }
+        tick(); setInterval(tick, 1000);
+      })();
+
+      /* ---------- mission clock ---------- */
+      (function clock() {
+        var ITEMS = [
+          { t: 0, title: 'Hacking begins', note: 'Problem statements are live. Clock starts.' },
+          { t: 3, title: 'Lunch and mentors open', note: 'Mentors join the floor until midnight.' },
+          { t: 7, title: 'Mentor round one', note: 'Fifteen minutes per team to test your idea.' },
+          { t: 10, title: 'Dinner', note: 'Hot food at the cafeteria.' },
+          { t: 13, title: 'Midnight checkpoint', note: 'Two-minute progress pitch to a judge.' },
+          { t: 19, title: 'Breakfast and mentor round two', note: 'Time to cut scope and fix the demo.' },
+          { t: 22, title: 'Submissions close', note: 'Repo link, demo video and slide deck due.' },
+          { t: 24, title: 'Code freeze, demos begin', note: 'Four-minute live demo per team.' },
+          { t: 28, title: 'Results and closing', note: 'Winners announced on stage.' }
+        ];
+        var slider = document.getElementById('slider'), list = document.getElementById('sched'), rdT = document.getElementById('rdT'), rdC = document.getElementById('rdClock'), now = document.getElementById('nowBox');
+        function p(n) { return n < 10 ? '0' + n : '' + n; }
+        function clockAt(h) { var tot = 11 + h, day = tot < 24 ? 'Sat' : 'Sun', hh = tot % 24; return { day: day, str: day + ' ' + p(hh) + ':00', hh: p(hh) + ':00', day2: day }; }
+        ITEMS.forEach(function (it, i) {
+          var li = document.createElement('li'), b = document.createElement('button'); b.type = 'button';
+          b.innerHTML = '<span class="t">T+' + p(it.t) + '</span><span>' + it.title + '<em>' + clockAt(it.t).str + ' · ' + it.note + '</em></span>';
+          b.addEventListener('click', function () { slider.value = it.t; render(); });
+          li.appendChild(b); list.appendChild(li); it.el = b;
+        });
+        function render() {
+          var v = +slider.value, cur = 0;
+          ITEMS.forEach(function (it, i) { if (it.t <= v) cur = i; });
+          ITEMS.forEach(function (it, i) { it.el.className = i < cur ? 'done' : (i === cur ? 'on' : ''); });
+          rdT.textContent = 'T+' + p(v); rdC.textContent = clockAt(v).str + (v >= 24 ? ' · hacking over' : ' · ' + (24 - v) + ' h left');
+          now.innerHTML = ITEMS[cur].title + '<span>' + ITEMS[cur].note + '</span>';
+        }
+        slider.addEventListener('input', render); render();
+      })();
+
+      /* ---------- boarding pass ---------- */
+      (function pass() {
+        var form = document.getElementById('regForm'), pass = document.getElementById('pass'), stamp = document.getElementById('stamp'), issued = null;
+        var f = { name: document.getElementById('fName'), team: document.getElementById('fTeam'), size: document.getElementById('fSize'), track: document.getElementById('fTrack') };
+        function $(id) { return document.getElementById(id); }
+        function cssFor(name) { for (var i = 0; i < TRACKS.length; i++) if (TRACKS[i].name === name) return TRACKS[i].css; return '#ffb347'; }
+        function render() {
+          var n = +f.size.value || 1;
+          $('pTeam').textContent = f.team.value.trim().toUpperCase() || 'YOUR TEAM NAME';
+          $('pName').textContent = f.name.value.trim().toUpperCase() || 'FIRST NAME LAST NAME';
+          $('pSize').textContent = n + (n === 1 ? ' pilot' : ' pilots');
+          $('pTrack').textContent = f.track.value + ' payload';
+          $('pHours').textContent = (24 * n) + ' crew-hours';
+          $('pNum').textContent = issued || 'I26000000000';
+          pass.style.setProperty('--c', cssFor(f.track.value));
+          pass.classList.toggle('empty', !issued && !f.team.value.trim() && !f.name.value.trim());
+          stamp.textContent = issued ? 'ISSUED' : 'DRAFT';
+        }
+        ['input', 'change'].forEach(function (ev) { form.addEventListener(ev, function () { issued = null; render(); }); });
+        f.track.addEventListener('change', function () { if (window.__chooseTrack) window.__chooseTrack(f.track.value); });
+        form.addEventListener('submit', function (e) {
+          e.preventDefault();
+          if (!form.checkValidity()) { form.reportValidity(); return; }
+          var submitButton = form.querySelector('button[type="submit"]');
+          var note = document.getElementById('formNote');
+          submitButton.disabled = true;
+          note.textContent = 'Saving your team registration…';
+          fetch('/api/event-registration', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name: document.getElementById('fName').value.trim(),
+              email: document.getElementById('fEmail').value.trim(),
+              college: document.getElementById('fCollege').value.trim(),
+              team: f.team.value.trim(),
+              size: f.size.value,
+              track: f.track.value
+            })
+          }).then(function (response) {
+            return response.json().then(function (data) {
+              if (!response.ok) throw new Error(data.error || 'Could not save the registration.');
+              issued = data.passNumber;
+              render();
+              pass.classList.remove('empty');
+              note.textContent = 'Pass ' + issued + ' saved to your account.';
+              pass.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'nearest' });
+            });
+          }).catch(function (error) {
+            note.textContent = error.message || 'Could not save your registration. Please try again.';
+          }).then(function () {
+            submitButton.disabled = false;
+          });
+        });
+        fetch('/api/session', { credentials: 'same-origin' }).then(function (response) {
+          if (!response.ok) {
+            location.replace('auth.html');
+            return null;
+          }
+          return response.json();
+        }).then(function (session) {
+          if (!session) return;
+          document.getElementById('fEmail').value = session.user.email;
+          return fetch('/api/event-registration', { credentials: 'same-origin' }).then(function (response) {
+            if (response.status === 404) return null;
+            return response.json().then(function (registration) {
+              if (!response.ok) throw new Error(registration.error || 'Could not load your saved boarding pass.');
+              return registration;
+            });
+          }).then(function (registration) {
+            if (!registration) return;
+            document.getElementById('fName').value = registration.name;
+            document.getElementById('fCollege').value = registration.college;
+            f.team.value = registration.team;
+            f.size.value = String(registration.team_size);
+            f.track.value = registration.track;
+            issued = registration.passNumber;
+            render();
+            pass.classList.remove('empty');
+            document.getElementById('formNote').textContent = 'Pass ' + issued + ' is saved to your account.';
+            if (window.__chooseTrack) window.__chooseTrack(f.track.value);
+          });
+        }).catch(function (error) {
+          console.error('Could not load your saved registration.', error);
+          document.getElementById('formNote').textContent = 'Could not load your saved pass. Refresh the page to try again.';
+        });
+        render();
+      })();
+
+      document.getElementById('signOut').addEventListener('click', function () {
+        fetch('/api/logout', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: '{}'
+        }).then(function (response) {
+          if (!response.ok) throw new Error('The server could not end your session.');
+          location.replace('auth.html?mode=login');
+        }).catch(function (error) {
+          console.error('Could not sign out.', error);
+          window.alert('Could not sign out. Please try again.');
+        });
+      });
+
+      document.getElementById('downloadPass').addEventListener('click', function () {
+        window.print();
+      });
+
+    })();
+  </script>
+
+</body>
+
+</html>

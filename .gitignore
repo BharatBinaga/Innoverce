@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+
+data/*.sqlite
+data/*.sqlite3
+data/*.db
+
+.gradle/
+build/
+android/.gradle/
+android/**/build/
+local.properties
+
+*.apk
+*.aab

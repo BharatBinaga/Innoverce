@@ -1,0 +1,663 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#050507">
+  <title>Sign in · Innoverce 26</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #000;
+      --panel: rgba(12, 12, 15, 0.76);
+      --line: rgba(225, 218, 205, 0.14);
+      --text: #efeae0;
+      --mute: #948f86;
+      --amber: #ffb347;
+      --ice: #d3d6db;
+      --display: "Bricolage Grotesque", "Arial Narrow", system-ui, sans-serif;
+      --body: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+      --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+      font-family: var(--body);
+      color: var(--text);
+      background: var(--ink);
+      color-scheme: dark;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-width: 320px;
+      min-height: 100%;
+    }
+
+    body {
+      min-height: 100vh;
+      min-height: 100svh;
+      margin: 0;
+      padding: max(18px, env(safe-area-inset-top)) max(22px, env(safe-area-inset-right)) max(22px, env(safe-area-inset-bottom)) max(22px, env(safe-area-inset-left));
+      overflow-x: hidden;
+      background:
+        radial-gradient(700px 420px at 85% -5%, rgba(255, 170, 80, 0.07), transparent 70%),
+        radial-gradient(600px 400px at 0% 40%, rgba(255, 255, 255, 0.025), transparent 70%),
+        var(--ink);
+    }
+
+    #space {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .auth-wrap {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      width: min(100%, 1120px);
+      min-height: calc(100vh - max(40px, env(safe-area-inset-top)) - max(40px, env(safe-area-inset-bottom)));
+      min-height: calc(100svh - max(40px, env(safe-area-inset-top)) - max(40px, env(safe-area-inset-bottom)));
+      margin-inline: auto;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 9px 0 20px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 11px;
+      color: var(--text);
+      text-decoration: none;
+      font: 700 18px var(--display);
+      letter-spacing: -0.01em;
+    }
+
+    .brand i {
+      position: relative;
+      display: inline-block;
+      width: 22px;
+      height: 22px;
+      border: 1.5px solid var(--ice);
+      border-radius: 50%;
+      transform: rotate(-25deg) scaleY(0.55);
+    }
+
+    .brand i::after {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--amber);
+      content: "";
+      transform: translate(-50%, -50%) scaleY(1.8);
+    }
+
+    .flight-label,
+    .eyebrow,
+    .field-label,
+    .demo-note,
+    .planet-hint,
+    .footer {
+      font-family: var(--mono);
+      text-transform: uppercase;
+    }
+
+    .flight-label {
+      color: var(--mute);
+      font-size: 10px;
+      letter-spacing: 0.13em;
+      text-align: right;
+    }
+
+    .auth-layout {
+      display: grid;
+      flex: 1;
+      grid-template-columns: minmax(0, 1.05fr) minmax(350px, 0.8fr);
+      align-items: center;
+      gap: clamp(32px, 7vw, 96px);
+      padding-block: 34px 54px;
+    }
+
+    .intro {
+      max-width: 510px;
+      padding: 16px 0;
+    }
+
+    .eyebrow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 14px;
+      color: var(--ice);
+      font-size: 11px;
+      letter-spacing: 0.13em;
+    }
+
+    .eyebrow span+span::before {
+      margin-right: 14px;
+      color: var(--mute);
+      content: "/";
+    }
+
+    h1 {
+      margin: 22px 0 18px;
+      font: 800 clamp(4rem, 8vw, 7rem)/0.88 var(--display);
+      letter-spacing: -0.055em;
+      text-wrap: balance;
+    }
+
+    h1 span {
+      display: block;
+      color: transparent;
+      -webkit-text-stroke: 1.5px var(--amber);
+    }
+
+    .intro-copy {
+      max-width: 40ch;
+      margin: 0;
+      color: var(--mute);
+      font-size: 17px;
+      line-height: 1.65;
+    }
+
+    .intro-copy strong {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .mission-stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      max-width: 460px;
+      margin-top: 32px;
+      border-block: 1px solid var(--line);
+    }
+
+    .mission-stats div {
+      padding: 13px 12px 13px 0;
+    }
+
+    .mission-stats div+div {
+      padding-left: 16px;
+      border-left: 1px solid var(--line);
+    }
+
+    .mission-stats b,
+    .mission-stats span {
+      display: block;
+    }
+
+    .mission-stats b {
+      font: 600 15px var(--display);
+    }
+
+    .mission-stats span {
+      margin-top: 3px;
+      color: var(--mute);
+      font: 9px var(--mono);
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+    }
+
+    .planet-hint {
+      margin: 20px 0 0;
+      color: rgba(211, 214, 219, 0.68);
+      font-size: 9px;
+      letter-spacing: 0.11em;
+    }
+
+    .auth-card {
+      width: 100%;
+      padding: clamp(23px, 4vw, 36px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 24px;
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.035)), var(--panel);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 24px 80px rgba(0, 0, 0, 0.42);
+      -webkit-backdrop-filter: blur(22px) saturate(145%);
+      backdrop-filter: blur(22px) saturate(145%);
+    }
+
+    .card-kicker {
+      margin: 0 0 8px;
+      color: var(--amber);
+      font: 500 10px var(--mono);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    h2 {
+      margin: 0;
+      font: 700 clamp(1.8rem, 4vw, 2.35rem)/1.05 var(--display);
+      letter-spacing: -0.035em;
+    }
+
+    .card-intro {
+      margin: 9px 0 22px;
+      color: var(--mute);
+      font-size: 14px;
+    }
+
+    .mode-switch {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 4px;
+      margin-bottom: 22px;
+      padding: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-radius: 12px;
+      background: rgba(0, 0, 0, 0.32);
+    }
+
+    .mode-switch button {
+      min-height: 40px;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--mute);
+      font: 500 13px var(--body);
+      cursor: pointer;
+    }
+
+    .mode-switch button[aria-selected="true"] {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    form {
+      display: grid;
+      gap: 15px;
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+    }
+
+    .field[hidden] {
+      display: none;
+    }
+
+    .field-label {
+      color: var(--mute);
+      font-size: 9px;
+      letter-spacing: 0.12em;
+    }
+
+    input {
+      width: 100%;
+      min-height: 46px;
+      padding: 11px 13px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 11px;
+      outline: none;
+      background: rgba(255, 255, 255, 0.055);
+      color: var(--text);
+      font: 400 15px var(--body);
+      transition: border-color .2s, background .2s, box-shadow .2s;
+    }
+
+    input::placeholder {
+      color: #77736c;
+    }
+
+    input:hover {
+      border-color: rgba(255, 255, 255, 0.28);
+    }
+
+    input:focus-visible {
+      border-color: var(--amber);
+      box-shadow: 0 0 0 3px rgba(255, 179, 71, 0.14);
+    }
+
+    .submit {
+      display: inline-flex;
+      min-height: 47px;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 3px;
+      padding: 11px 18px;
+      border: 0;
+      border-radius: 999px;
+      background: var(--amber);
+      color: #1a1204;
+      font: 600 14px var(--body);
+      cursor: pointer;
+      transition: transform .15s, box-shadow .2s, opacity .2s;
+    }
+
+    .submit:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 25px rgba(255, 179, 71, 0.24);
+    }
+
+    .submit:disabled {
+      cursor: progress;
+      opacity: 0.65;
+    }
+
+    .auth-message {
+      min-height: 20px;
+      margin: 0;
+      color: var(--mute);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .auth-message[data-kind="error"] {
+      color: #f0a18f;
+    }
+
+    .auth-message[data-kind="success"] {
+      color: #a9c4b0;
+    }
+
+    .demo-note {
+      margin: 15px 0 0;
+      padding-top: 13px;
+      border-top: 1px solid var(--line);
+      color: rgba(211, 214, 219, 0.57);
+      font-size: 9px;
+      line-height: 1.65;
+      letter-spacing: 0.035em;
+      text-transform: none;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+      color: var(--mute);
+      font-size: 9px;
+      letter-spacing: 0.1em;
+    }
+
+    button:focus-visible,
+    a:focus-visible {
+      outline: 2px solid var(--amber);
+      outline-offset: 3px;
+    }
+
+    @media (max-width: 760px) {
+      .auth-wrap {
+        min-height: 0;
+      }
+
+      .topbar {
+        padding-bottom: 9px;
+      }
+
+      .auth-layout {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 20px;
+        padding-block: 16px 24px;
+      }
+
+      .intro {
+        padding: 10px 0 0;
+      }
+
+      h1 {
+        margin: 17px 0 12px;
+        font-size: clamp(3.5rem, 15vw, 5.8rem);
+      }
+
+      .intro-copy {
+        max-width: 48ch;
+        font-size: 15px;
+      }
+
+      .mission-stats {
+        margin-top: 18px;
+      }
+
+      .planet-hint {
+        margin-top: 12px;
+      }
+
+      .auth-card {
+        max-width: 520px;
+        justify-self: center;
+      }
+    }
+
+    @media (max-width: 420px) {
+      body {
+        padding-inline: 16px;
+      }
+
+      .flight-label {
+        font-size: 8px;
+      }
+
+      .mission-stats b {
+        font-size: 13px;
+      }
+
+      .mission-stats span {
+        font-size: 8px;
+        letter-spacing: 0.04em;
+      }
+
+      .auth-card {
+        padding: 22px 18px;
+        border-radius: 20px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+
+<body class="auth-page">
+  <canvas id="space" aria-hidden="true"></canvas>
+  <div class="auth-wrap">
+    <header class="topbar">
+      <a class="brand" href="auth.html" aria-label="Innoverce 26 access portal"><i aria-hidden="true"></i>Innoverce
+        26</a>
+      <span class="flight-label">MISSION ACCESS · 2026</span>
+    </header>
+
+    <main class="auth-layout">
+      <section class="intro" aria-labelledby="pageTitle">
+        <div class="eyebrow"><span>24-hour hackathon</span><span>5–6 Dec 2026</span></div>
+        <h1 id="pageTitle">Build beyond<span>the ordinary.</span></h1>
+        <p class="intro-copy">One launch window. Four tracks. <strong>Your next big idea starts here.</strong> Sign in
+          to join the Innoverce 26 mission.</p>
+        <div class="mission-stats" aria-label="Mission details">
+          <div><b>24 hours</b><span>Build window</span></div>
+          <div><b>4 tracks</b><span>Choose a payload</span></div>
+          <div><b>₹1.4 lakh</b><span>Prize pool</span></div>
+        </div>
+        <p class="planet-hint">Explore the system · tap a planet to send a pulse</p>
+      </section>
+
+      <section class="auth-card" aria-labelledby="formTitle">
+        <p class="card-kicker">Crew portal · Earth station</p>
+        <h2 id="formTitle">Welcome aboard</h2>
+        <p class="card-intro" id="formIntro">Sign in to continue to the mission.</p>
+
+        <div class="mode-switch" role="tablist" aria-label="Account access">
+          <button type="button" id="loginTab" role="tab" aria-selected="true" aria-controls="authForm">Log in</button>
+          <button type="button" id="registerTab" role="tab" aria-selected="false" aria-controls="authForm">Create
+            account</button>
+        </div>
+
+        <form id="authForm" novalidate>
+          <label class="field" id="nameField" hidden>
+            <span class="field-label">Your name</span>
+            <input id="name" name="name" type="text" autocomplete="name" placeholder="Aarav Gowda" maxlength="80">
+          </label>
+          <label class="field">
+            <span class="field-label">Email address</span>
+            <input id="email" name="email" type="email" autocomplete="email" placeholder="you@college.edu" required
+              maxlength="254">
+          </label>
+          <label class="field">
+            <span class="field-label">Password</span>
+            <input id="password" name="password" type="password" autocomplete="current-password"
+              placeholder="At least 8 characters" required minlength="8" maxlength="128">
+          </label>
+          <label class="field" id="confirmField" hidden>
+            <span class="field-label">Confirm password</span>
+            <input id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password"
+              placeholder="Enter your password again">
+          </label>
+          <button class="submit" id="submitButton" type="submit">Log in to Innoverce 26</button>
+          <p class="auth-message" id="authMessage" role="status" aria-live="polite"></p>
+        </form>
+        <p class="demo-note">Your account details are stored securely on this site’s SQLite server. Registration does
+          not sign you in automatically.</p>
+      </section>
+    </main>
+
+    <footer class="footer"><span>INNOVERCE 26 · 5–6 DEC 2026</span><span>ALL SYSTEMS NOMINAL</span></footer>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="assets/auth-planets.js"></script>
+  <script>
+    (function () {
+      var form = document.getElementById('authForm');
+      var nameField = document.getElementById('nameField');
+      var confirmField = document.getElementById('confirmField');
+      var nameInput = document.getElementById('name');
+      var emailInput = document.getElementById('email');
+      var passwordInput = document.getElementById('password');
+      var confirmInput = document.getElementById('confirmPassword');
+      var submitButton = document.getElementById('submitButton');
+      var message = document.getElementById('authMessage');
+      var loginTab = document.getElementById('loginTab');
+      var registerTab = document.getElementById('registerTab');
+      var mode = new URLSearchParams(location.search).get('mode') === 'register' ? 'register' : 'login';
+      fetch('/api/session', { credentials: 'same-origin' }).then(function (response) {
+        if (response.ok) location.replace('Orbit24.html');
+      }).catch(function () {
+        setMessage('The account service is unavailable. Start the Innoverce 26 server and try again.', 'error');
+      });
+
+      function setMessage(text, kind) {
+        message.textContent = text;
+        message.dataset.kind = kind || '';
+      }
+
+      function setMode(nextMode) {
+        mode = nextMode;
+        var registering = mode === 'register';
+        nameField.hidden = !registering;
+        confirmField.hidden = !registering;
+        nameInput.required = registering;
+        confirmInput.required = registering;
+        passwordInput.autocomplete = registering ? 'new-password' : 'current-password';
+        loginTab.setAttribute('aria-selected', String(!registering));
+        registerTab.setAttribute('aria-selected', String(registering));
+        document.getElementById('formTitle').textContent = registering ? 'Create your account' : 'Welcome aboard';
+        document.getElementById('formIntro').textContent = registering
+          ? 'Create a crew account to enter the mission.'
+          : 'Sign in to continue to the mission.';
+        submitButton.textContent = registering ? 'Create account' : 'Log in to Innoverce 26';
+        setMessage('');
+      }
+
+      function submitRegistration() {
+        if (!form.reportValidity()) return Promise.resolve();
+        if (passwordInput.value !== confirmInput.value) {
+          setMessage('Those passwords do not match. Please check and try again.', 'error');
+          confirmInput.focus();
+          return Promise.resolve();
+        }
+
+        return request('/api/register', {
+          name: nameInput.value.trim(),
+          email: emailInput.value.trim(),
+          password: passwordInput.value
+        }).then(function (result) {
+          setMode('login');
+          emailInput.value = emailInput.value.trim().toLowerCase();
+          passwordInput.value = '';
+          confirmInput.value = '';
+          nameInput.value = '';
+          setMessage(result.message, 'success');
+          passwordInput.focus();
+        });
+      }
+
+      function submitLogin() {
+        if (!form.reportValidity()) return Promise.resolve();
+        return request('/api/login', {
+          email: emailInput.value.trim(),
+          password: passwordInput.value
+        }).then(function () {
+          location.replace('Orbit24.html');
+        });
+      }
+
+      function request(url, payload) {
+        return fetch(url, {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        }).then(function (response) {
+          return response.json().then(function (data) {
+            if (!response.ok) throw new Error(data.error || 'The request could not be completed.');
+            return data;
+          });
+        });
+      }
+
+      loginTab.addEventListener('click', function () { setMode('login'); });
+      registerTab.addEventListener('click', function () { setMode('register'); });
+      form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        if (submitButton.disabled) return;
+        submitButton.disabled = true;
+        setMessage(mode === 'register' ? 'Creating your crew account…' : 'Checking your crew credentials…');
+        var operation;
+        try {
+          operation = mode === 'register' ? submitRegistration() : submitLogin();
+        } catch (error) {
+          operation = Promise.reject(error);
+        }
+        Promise.resolve(operation).catch(function (error) {
+          console.error('The account request failed.', error);
+          setMessage(error.message || 'Could not complete the request. Please try again.', 'error');
+        }).then(function () {
+          submitButton.disabled = false;
+        });
+      });
+
+      setMode(mode);
+    })();
+  </script>
+</body>
+
+</html>
